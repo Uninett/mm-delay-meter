@@ -16,3 +16,4 @@ void measureLEDDelay();
 void printSensorValue();
 void printDelay();
 bool measureLEDCheckFlag();
+void measureLEDPrintToSerial();

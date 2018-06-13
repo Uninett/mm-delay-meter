@@ -21,6 +21,7 @@ void measureLEDSetup(){
     //pinMode(lightSensorInterruptPin, INPUT); // or INPUT_PULLUP?
     attachInterrupt(digitalPinToInterrupt(lightSensorInterruptPin), measureLEDDelay, RISING);
     interrupts();
+    Serial.println("DELAY (ms)");
 }
 
 /* Interrupt service routine for external interrupt at pin 3, triggers when light is recieved at sensor */
@@ -49,7 +50,7 @@ void measureLEDDelay(){
 // debug only
 void printSensorValue(){
     // Read analog value (for "debug")
-    int raw_sample = digitalRead(lightSensorInterruptPin);
+    int raw_sample = analogRead(lightSensorPin);
     Serial.print("Light sensor interrupt pin: ");
     Serial.println(raw_sample);
 }
@@ -58,6 +59,7 @@ void printDelay(){
 	Serial.print(deltaMicros);
 	Serial.println(" us");
 }
+//
 
 bool measureLEDCheckFlag(){
 	if (led_flag){ 
@@ -69,10 +71,9 @@ bool measureLEDCheckFlag(){
  	}
 }
 
-
-
-
-
+void measureLEDPrintToSerial(){
+	Serial.println(deltaMicros/1000);
+}
 
 
 // void lightSetup()
