@@ -3,7 +3,6 @@
 
 #include "signal_generator_timer.h"
 #include "Arduino.h"
-#include "Timer3/Timer3.h"
 volatile int out_flag;
 
 
@@ -28,7 +27,6 @@ void SGTimerSetup()
 ISR(TIMER1_COMPA_vect)
 {
 	out_flag = 1;
-	
 }
 
 bool SGTimerCheckFlag(){

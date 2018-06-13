@@ -2,8 +2,7 @@
 
 #include "signal_generator_led.h"
 #include "signal_generator_timer.h"
-
-unsigned short lastTickCount;
+#include "Timer3/Timer3.h"
 
 void SGLEDSetup()
 {
@@ -13,15 +12,13 @@ void SGLEDSetup()
 void SGLEDToggle()
 {
 	int prev_ledPin_status = digitalRead(ledPin);
-	digitalWrite(ledPin, prev_ledPin_status ^1);   // toggle LED pin
 	
 	if (prev_ledPin_status == 0){
-		// if rising edge: Reset counter of light delay
-
-		//resetTimer3();
-		// Initialize our counter, or set to zero??
-	 	//lastTickCount = readTimer3();
+		// Rising edge: Reset counter of light delay
+		// Assume paused (in ISR of measurement)
+		// Initialize our counter to zero
+		resetTimer3();
+		resumeTimer3();
 	}
-
-	
+	digitalWrite(ledPin, prev_ledPin_status ^1);   // toggle LED pin
 }

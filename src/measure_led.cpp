@@ -4,43 +4,75 @@
 
 #include "Arduino.h"
 #include "measure_led.h"
+#include "Timer3/Timer3.h"
 
 volatile int led_flag;
+volatile unsigned short delta;
+volatile unsigned long deltaMicros;
+
 int samples[NUM_SAMPLES];
 
 void measureLEDSetup(){
-    // Timer 3 for measuring delay
+    // Timer 3 for measuring delay, 64us resolution
+    startUltraSlowCountingTimer3();
+    pauseTimer3();
 
     led_flag = 0;
-    pinMode(lightSensorInterruptPin, INPUT); // or INPUT_PULLUP?
+    //pinMode(lightSensorInterruptPin, INPUT); // or INPUT_PULLUP?
     attachInterrupt(digitalPinToInterrupt(lightSensorInterruptPin), measureLEDDelay, RISING);
+    interrupts();
 }
 
 /* Interrupt service routine for external interrupt at pin 3, triggers when light is recieved at sensor */
 void measureLEDDelay(){
-    led_flag = 1;
+	
     // Stop timer
+    pauseTimer3();
+
     // Save delay measurement
 
     // readTimer1() returns a maximum value of 65535
     // That means the maximum possible delta one can measure with this
-    // function (when in slow counting mode) is 1048ms on 16 MHz boards,
+    // function (when in ultra slow counting mode) is 4194ms on 16 MHz boards,
     // and 2097ms on 8 MHz boards
-    //unsigned short delta = readTimer1() - lastTickCount;
+    delta = readTimer3();
 
     // If you estimate deltaMicros could be > 65 ms, or 65535 us,
     // delta should be cast to unsigned long, and deltaMicros should be
     // created as an unsigned long variable
-    //unsigned long deltaMicros = microsFromSlowCounting((unsigned long)delta);
+    deltaMicros = microsFromUltraSlowCounting((unsigned long)delta);
+
+    led_flag = 1;
 
 }
+
 // debug only
 void printSensorValue(){
     // Read analog value (for "debug")
-    int raw_sample = analogRead(lightSensorPin);
-    Serial.print("Light sensor: ");
+    int raw_sample = digitalRead(lightSensorInterruptPin);
+    Serial.print("Light sensor interrupt pin: ");
     Serial.println(raw_sample);
 }
+void printDelay(){
+	Serial.print("Light delay: ");
+	Serial.print(deltaMicros);
+	Serial.println(" us");
+}
+
+bool measureLEDCheckFlag(){
+	if (led_flag){ 
+    	led_flag = 0;
+    	return true;
+ 	}
+ 	else{
+    	return false;
+ 	}
+}
+
+
+
+
+
 
 
 // void lightSetup()
