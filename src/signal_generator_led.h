@@ -5,3 +5,5 @@
 
 void SGLEDSetup();
 void SGLEDToggle();
+bool SGLEDCheckFlag();
+void SGLEDSetFlag(bool val);
