@@ -1,19 +1,17 @@
 #pragma once
 
-#define NUM_SAMPLES 			10
+#define NUM_SAMPLES 			20
 #define lightSensorPin			A0
 #define lightSensorInterruptPin	7		
 
-// void lightSetup();
-// void initializeSamples();
-// void readLightInput();
-// int findMax();
-// int maxSmoothingFilter();
-// bool risingEdgeDetection();
+void measureLEDInitializeSamples();
+unsigned short measureLEDMaxSmoothingFilter();
+void measureLEDRisingEdgeDetection();
 
 void measureLEDSetup();
 void measureLEDDelay();
 void printSensorValue();
 void printDelay();
+void printSamples();
 bool measureLEDCheckFlag();
 void measureLEDPrintToSerial();

@@ -5,28 +5,35 @@
 #include "Arduino.h"
 #include "measure_led.h"
 #include "Timer3/Timer3.h"
+#include "signal_generator_led.h"
 
-volatile int led_flag;
+volatile bool led_flag;
 volatile unsigned short delta;
 volatile unsigned long deltaMicros;
+unsigned long num_runs;
 
-int samples[NUM_SAMPLES];
+unsigned short samples[NUM_SAMPLES];
 
-void measureLEDSetup(){
+
+void measureLEDSetup()
+{
     // Timer 3 for measuring delay, 64us resolution
     startUltraSlowCountingTimer3();
     pauseTimer3();
 
     led_flag = 0;
-    //pinMode(lightSensorInterruptPin, INPUT); // or INPUT_PULLUP?
+    pinMode(lightSensorInterruptPin, OUTPUT);	// Can generate software interrupt
+    digitalWrite(lightSensorInterruptPin, LOW);
     attachInterrupt(digitalPinToInterrupt(lightSensorInterruptPin), measureLEDDelay, RISING);
-    interrupts();
     Serial.println("DELAY (ms)");
+
+    measureLEDInitializeSamples();
+    num_runs = 0;
 }
 
 /* Interrupt service routine for external interrupt at pin 3, triggers when light is recieved at sensor */
-void measureLEDDelay(){
-	
+void measureLEDDelay()
+{
     // Stop timer
     pauseTimer3();
 
@@ -44,14 +51,13 @@ void measureLEDDelay(){
     deltaMicros = microsFromUltraSlowCounting((unsigned long)delta);
 
     led_flag = 1;
-
 }
 
 // debug only
 void printSensorValue(){
     // Read analog value (for "debug")
-    int raw_sample = analogRead(lightSensorPin);
-    Serial.print("Light sensor interrupt pin: ");
+    unsigned short raw_sample = analogRead(lightSensorPin);
+    Serial.print("Light sensor pin: ");
     Serial.println(raw_sample);
 }
 void printDelay(){
@@ -59,9 +65,17 @@ void printDelay(){
 	Serial.print(deltaMicros);
 	Serial.println(" us");
 }
+void printSamples(){
+	for (int i = 0; i < NUM_SAMPLES; i++){
+		Serial.print(samples[i]);
+		Serial.print("\t");
+	}
+	Serial.println();
+}
 //
 
-bool measureLEDCheckFlag(){
+bool measureLEDCheckFlag()
+{
 	if (led_flag){ 
     	led_flag = 0;
     	return true;
@@ -71,85 +85,89 @@ bool measureLEDCheckFlag(){
  	}
 }
 
-void measureLEDPrintToSerial(){
-	Serial.println(deltaMicros/1000);
+void measureLEDPrintToSerial()
+{
+	Serial.println(deltaMicros/1000.0);
 }
 
 
-// void lightSetup()
-// {
-//   initializeSamples();
-// }
 
-// /* Maximum smoothing filter */
-// void initializeSamples()
-// {
-//   for (int i = 0; i < NUM_SAMPLES; i++){
-//     samples[i] = 0;
-//   }
-// }
+/* Maximum smoothing filter */
+void measureLEDInitializeSamples()
+{
+	for (uint8_t i = 0; i < NUM_SAMPLES; i++){
+		samples[i] = 0;
+	}
+}
 
-// void readLightInput()
-// {
-//   static int current_index;
-  
-//   int raw_sample = analogRead(lightSensorPin);
-//   Serial.print("Light sensor: ");
-//   Serial.println(raw_sample);
+unsigned short measureLEDMaxSmoothingFilter()
+{
+	static uint8_t current_index;
+	static unsigned short max_sample;
+	static uint8_t max_sample_index;
 
-//   // Add sample to saved samples
-//   samples[current_index] = raw_sample;
+	unsigned short raw_sample = analogRead(lightSensorPin);
 
-//   if (current_index < NUM_SAMPLES - 1){
-//     current_index++;
-//   }
-//   else{
-//     current_index = 0;
-//   }
-// }
+	// Add sample to saved samples
+	samples[current_index] = raw_sample;
 
-// int findMax()
-// {
-//   // Find the maximum of NUM_SAMPLES previous samples
-//   int max_sample = 0;
-//   for (int i = 0; i < NUM_SAMPLES; i++){
-//     if (samples[i] > max_sample){
-//       max_sample = samples[i];
-//     }
-//   }
-//   return max_sample;
-// }
+	// Check if new sample replaces old max in samples[]
+	if (max_sample_index == current_index){
+		// Find the new maximum of NUM_SAMPLES previous samples
+		max_sample = 0;
+		for (uint8_t i = 0; i < NUM_SAMPLES; i++){
+		    if (samples[i] > max_sample){
+		    	max_sample = samples[i];
+		    	max_sample_index = i;
+		    }
+		}
+	}
+
+	// Check if new sample is new max
+	else if (max_sample < samples[current_index]){
+		max_sample = samples[current_index];
+		max_sample_index = current_index;
+	}
+
+	if (current_index < NUM_SAMPLES - 1){
+		current_index++;
+	} else{
+		current_index = 0;
+	}
+
+	return max_sample;
+}
 
 
-// int maxSmoothingFilter()
-// {
-//   readLightInput();
-//   return findMax();
-// }
+// Rising edge detection
+void measureLEDRisingEdgeDetection()
+{
+	
+	int current_max = measureLEDMaxSmoothingFilter();
+	static int prev_max = current_max;
+	static int prev_prev_max = current_max;
 
-// // Rising edge detection
-// bool risingEdgeDetection()
-// {
-//   int current_max = maxSmoothingFilter();
-//   static int prev_max = current_max;
-//   static int prev_prev_max = current_max;
+	bool edge_detected = false;
 
-//   bool edge_detected = false;
-  
-//   // Compare with previous max value
-//   if (current_max - prev_max > 20){
-//     edge_detected = true;
-//   }
-
-//   // Otherwise, compare previous 3 values
-//   else if (current_max - prev_prev_max > 20){
-//     edge_detected = true;
-//   }
-
-//   prev_prev_max = prev_max;
-//   prev_max = current_max;
-//   return edge_detected;
-// }
+	if (num_runs >= 3 && !SGLEDCheckFlag()){
+		edge_detected = (current_max - prev_max > 10);
+		// Otherwise, compare previous 3 values. Increased >20 and strictly increasing
+		if(!edge_detected){
+			edge_detected = (current_max - prev_prev_max > 10 && current_max > prev_max && prev_max > prev_prev_max);
+		}
+		
+		if (edge_detected){
+			digitalWrite(lightSensorInterruptPin, HIGH);
+			SGLEDSetFlag(1);	
+		}
+	}
+		
+	
+	prev_prev_max = prev_max;
+	prev_max = current_max;
+	
+	num_runs++;
+}
 
 
 

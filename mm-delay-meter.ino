@@ -38,15 +38,12 @@ void loop() {
   if (SGTimerCheckFlag()){
     SGLEDToggle();
     SGSpeakerPlaySound();
-    printSensorValue();
   }
-  
+  measureLEDRisingEdgeDetection();
+
   if (measureLEDCheckFlag()){
-    //Serial.println("Measurement interrupt");
-    printSensorValue();
-    printDelay();
+    digitalWrite(lightSensorInterruptPin, LOW);
     measureLEDPrintToSerial();
   }
-
-  
+ 
 }
