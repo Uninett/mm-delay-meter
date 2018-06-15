@@ -25,7 +25,6 @@ void measureLEDSetup()
     pinMode(lightSensorInterruptPin, OUTPUT);	// Can generate software interrupt
     digitalWrite(lightSensorInterruptPin, LOW);
     attachInterrupt(digitalPinToInterrupt(lightSensorInterruptPin), measureLEDDelay, RISING);
-    Serial.println("DELAY (ms)");
 
     measureLEDInitializeSamples();
     num_runs = 0;
@@ -54,24 +53,17 @@ void measureLEDDelay()
 }
 
 // debug only
-void printSensorValue(){
-    // Read analog value (for "debug")
-    unsigned short raw_sample = analogRead(lightSensorPin);
-    Serial.print("Light sensor pin: ");
-    Serial.println(raw_sample);
-}
-void printDelay(){
-	Serial.print("Light delay: ");
-	Serial.print(deltaMicros);
-	Serial.println(" us");
-}
-void printSamples(){
-	for (int i = 0; i < NUM_SAMPLES; i++){
-		Serial.print(samples[i]);
-		Serial.print("\t");
-	}
-	Serial.println();
-}
+// void printSensorValue(){
+//     // Read analog value (for "debug")
+//     unsigned short raw_sample = analogRead(lightSensorPin);
+//     Serial.print("Light sensor pin: ");
+//     Serial.println(raw_sample);
+// }
+// void printDelay(){
+// 	Serial.print("Light delay: ");
+// 	Serial.print(deltaMicros);
+// 	Serial.println(" us");
+// }
 //
 
 bool measureLEDCheckFlag()
@@ -88,6 +80,11 @@ bool measureLEDCheckFlag()
 void measureLEDPrintToSerial()
 {
 	Serial.println(deltaMicros/1000.0);
+}
+
+double measureLEDGetDelayMs()
+{
+	return deltaMicros/1000.0;
 }
 
 
@@ -146,6 +143,10 @@ void measureLEDRisingEdgeDetection()
 	int current_max = measureLEDMaxSmoothingFilter();
 	static int prev_max = current_max;
 	static int prev_prev_max = current_max;
+	static int prev_prev_prev_max = current_max;
+
+	// static int max_samples[NUM_MAX_SAMPLES] = {0};
+	// static uint8_t current_index;
 
 	bool edge_detected = false;
 
@@ -155,19 +156,65 @@ void measureLEDRisingEdgeDetection()
 		if(!edge_detected){
 			edge_detected = (current_max - prev_prev_max > 10 && current_max > prev_max && prev_max > prev_prev_max);
 		}
+		if (!edge_detected){
+			edge_detected = (current_max - prev_prev_prev_max > 10 
+							&& current_max > prev_max && prev_max > prev_prev_max && prev_prev_max > prev_prev_prev_max);
+		}
 		
 		if (edge_detected){
 			digitalWrite(lightSensorInterruptPin, HIGH);
 			SGLEDSetFlag(1);	
 		}
 	}
-		
-	
+	prev_prev_prev_max = prev_prev_max;
 	prev_prev_max = prev_max;
 	prev_max = current_max;
+
+
+	// max_samples[current_index] = current_max;
+	// if (num_runs >= NUM_MAX_SAMPLES && !SGLEDCheckFlag()){
+	// 	uint8_t i = 0;
+	// 	uint8_t j = NUM_MAX_SAMPLES - 1 - current_index;
+	// 	while(i < NUM_MAX_SAMPLES){
+	// 		if (i <= current_index){
+	// 			max_samples[current_index - i]
+	// 			// Check previous max samples, until current_i - i
+
+	// 		}
+	// 		else if (j > 0){
+	// 			max_samples[current_index + j]
+	// 			j--;
+	// 		}
+			
+
+	// 		i++;
+	// 	}
+
+	// 	if (edge_detected){
+	// 		digitalWrite(lightSensorInterruptPin, HIGH);
+	// 		SGLEDSetFlag(1);	
+	// 	}
+	// }
+		
+	// if (current_index < NUM_MAX_SAMPLES - 1){
+	// 	current_index++;
+	// } else{
+	// 	current_index = 0;
+	// }
 	
 	num_runs++;
 }
 
-
+// bool measureLEDCompare(const int* max_samples, const uint8_t last_check_index, const uint8_t first_check_index)
+// {
+// 	for (uint8_t i = last_check_index-1; i >= first_check_index; i--){
+// 		if (max_samples[i] <= max_samples[i-1]){
+// 			// Not strictly increasing
+// 			return false;
+// 		}
+// 		if (max_samples[last_check_index] - max_samples[i] > 10){
+			
+// 		}
+// 	}
+// }
 
