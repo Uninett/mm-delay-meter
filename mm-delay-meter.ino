@@ -27,6 +27,19 @@ void setup() {
   SDCardSetup();
 
   num_measurements = 0;
+
+//  String result;
+//  Process time;
+//  // date is a command line utility to get the date and the time
+//  // in different formats depending on the additional parameter
+//  time.runShellCommand("date");
+//
+//  // read the output of the command
+//  while (time.available() > 0) {
+//    char c = time.read();
+//    result += c;
+//  }
+//  Serial.println(result);
 }
 
 void loop() {
@@ -45,8 +58,9 @@ void loop() {
   }
   if (num_measurements >= NUM_MEASUREMENTS){
     /* Save measurements somewhere, try putty */
-    digitalWrite(ledPin, LOW); 
+    digitalWrite(ledPin, LOW);
     while(1){};
+  
   }
  
 }

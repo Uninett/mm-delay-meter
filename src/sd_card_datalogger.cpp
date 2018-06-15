@@ -13,10 +13,8 @@ void SDCardSetup() {
 void SDCardLogger(String filename) {
   // make a string that start with a timestamp for assembling the data to log:
   String dataString;
-  dataString += SDCardGetTimeStamp();
-  dataString += " = ";
 
-  float delay = measureLEDGetDelayMs();
+  double delay = measureLEDGetDelayMs();
   dataString += String(delay);
 
   // open the file. note that only one file can be open at a time,
@@ -30,31 +28,12 @@ void SDCardLogger(String filename) {
     dataFile.println(dataString);
     dataFile.close();
     // print to the serial port too:
-    SerialUSB.println(dataString);
+    Serial.println(dataString);
   }
   // if the file isn't open, pop up an error:
   else {
-    SerialUSB.println("error opening " + filename);
+    Serial.println("error opening " + filename);
   }
 
 
-}
-
-// This function return a string with the time stamp
-String SDCardGetTimeStamp() {
-  String result;
-  Process time;
-  // date is a command line utility to get the date and the time
-  // in different formats depending on the additional parameter
-  time.runShellCommand("date");
-
-  // read the output of the command
-  while (time.available() > 0) {
-    char c = time.read();
-    if (c != '\n') {
-      result += c;
-    }
-  }
-
-  return result;
 }
