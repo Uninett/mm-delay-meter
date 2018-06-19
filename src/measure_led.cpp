@@ -143,7 +143,6 @@ void measureLEDRisingEdgeDetection()
 	int current_max = measureLEDMaxSmoothingFilter();
 	static int prev_max = current_max;
 	static int prev_prev_max = current_max;
-	static int prev_prev_prev_max = current_max;
 
 	// static int max_samples[NUM_MAX_SAMPLES] = {0};
 	// static uint8_t current_index;
@@ -153,20 +152,15 @@ void measureLEDRisingEdgeDetection()
 	if (num_runs >= 3 && !SGLEDCheckFlag()){
 		edge_detected = (current_max - prev_max > 10);
 		// Otherwise, compare previous 3 values. Increased >20 and strictly increasing
-		if(!edge_detected){
-			edge_detected = (current_max - prev_prev_max > 10 && current_max > prev_max && prev_max > prev_prev_max);
-		}
-		if (!edge_detected){
-			edge_detected = (current_max - prev_prev_prev_max > 10 
-							&& current_max > prev_max && prev_max > prev_prev_max && prev_prev_max > prev_prev_prev_max);
-		}
+		 if(!edge_detected){ 
+      		edge_detected = (current_max - prev_prev_max > 10 && current_max > prev_max && prev_max > prev_prev_max); 
+    	}
 		
 		if (edge_detected){
 			digitalWrite(lightSensorInterruptPin, HIGH);
 			SGLEDSetFlag(1);	
 		}
 	}
-	prev_prev_prev_max = prev_prev_max;
 	prev_prev_max = prev_max;
 	prev_max = current_max;
 
