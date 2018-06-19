@@ -1,7 +1,7 @@
 #pragma once
 #include "Arduino.h"
 
-#define ledPin  13
+#define ledPin  12
 
 void SGLEDSetup();
 void SGLEDToggle();

@@ -3,6 +3,7 @@
 #include "signal_generator_led.h"
 #include "signal_generator_timer.h"
 #include "Timer3/Timer3.h"
+//#include "input_capture.h"
 
 bool light_recieved_at_sensor;
 
@@ -20,6 +21,7 @@ void SGLEDToggle()
 		// Assume paused (in ISR of measurement)
 		// Initialize our counter to zero
 		light_recieved_at_sensor = 0;
+		//inputCaptureSetFlag(LOW);
 		resetTimer3();
 		resumeTimer3();
 	}
