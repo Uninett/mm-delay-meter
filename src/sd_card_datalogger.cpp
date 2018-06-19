@@ -3,6 +3,7 @@
 #include <FileIO.h>
 #include "sd_card_datalogger.h"
 #include "measure_led.h"
+//#include "input_capture.h"
 
 void SDCardSetup() {
     // Initialize the Bridge and the Serial
@@ -61,4 +62,41 @@ void SDCardLogger(String filename, int num) {
     }
 
 
+}
+
+void SDCardPrintContent()
+{
+    bool donereading = false;
+
+    String dataString;
+    char c;
+    String s;
+
+    //open the file for reading:
+    File myFile = FileSystem.open("/mnt/sd/measurements.txt", FILE_READ);
+    Serial.println("SD card contents:");
+
+    if (myFile && !donereading) {
+
+    // read from the file until there's nothing else in it:
+        while (myFile.available()) {
+
+            c = myFile.read();
+            s = s + String(c);
+              
+        }
+        Serial.println(s);
+        s = "";
+        donereading = true;
+    }  
+
+    if (donereading){
+        myFile.close();
+        Serial.println("END OF THE FILE");
+        delay(10000);
+    }
+    else {
+        // if the file didn't open, print an error:
+        Serial.println("error opening measurements.txt for reading");
+    }
 }
