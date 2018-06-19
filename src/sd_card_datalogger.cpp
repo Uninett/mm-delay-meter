@@ -7,6 +7,9 @@
 void SDCardSetup() {
   // Initialize the Bridge and the Serial
   FileSystem.begin();
+    // Initialize the Bridge and the Serial
+    FileSystem.begin();
+    FileSystem.remove("/mnt/sd/measurements.txt");
 }
 
 
