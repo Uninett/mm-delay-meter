@@ -11,30 +11,54 @@ void SDCardSetup() {
 }
 
 
-void SDCardLogger(String filename) {
-  // make a string that start with a timestamp for assembling the data to log:
-  String dataString;
+void SDCardLogger(String filename, int num) {
+    // open the file. note that only one file can be open at a time,
+    // so you have to close this one before opening another.
+    File dataFile = FileSystem.open(("/mnt/sd/" + filename).c_str(), FILE_APPEND);
 
-  double delay = measureLEDGetDelayMs();
-  dataString += String(delay);
+    // make a string that start with a timestamp for assembling the data to log:
+    String dataString;
+    if (num == 0){
+        Process time;
+        time.runShellCommand("date");
 
-  // open the file. note that only one file can be open at a time,
-  // so you have to close this one before opening another.
-  // The FileSystem card is mounted at the following "/mnt/FileSystema1"
-  String filepath = "/mnt/sd/" + filename;
-  File dataFile = FileSystem.open(filepath.c_str(), FILE_APPEND);
+        // read the output of the command
+        while (time.running());
+        while (time.available() > 0) {
+            char c = time.read();
+            dataString += c;
+        }
+        // if the file is available, write to it:
+        if (dataFile) {
+            dataFile.print(dataString);
+            Serial.print(dataString);
+        }
+        // if the file isn't open, pop up an error:
+        else {
+            Serial.println("error opening " + filename);
+            return;
+        }
+    }
 
-  // if the file is available, write to it:
-  if (dataFile) {
-    dataFile.println(dataString);
-    dataFile.close();
-    // print to the serial port too:
-    Serial.println(dataString);
-  }
-  // if the file isn't open, pop up an error:
-  else {
-    Serial.println("error opening " + filename);
-  }
+    double delay = measureLEDGetDelayMs();
+    //double delay = inputCaptureGetDelayMs();
+    dataString = String(num);
+    dataString += "\t";
+    dataString += String(delay);
+
+    
+
+    // if the file is available, write to it:
+    if (dataFile) {
+        dataFile.println(dataString);
+        dataFile.close();
+        // print to the serial port too:
+        Serial.println(dataString);
+    }
+    // if the file isn't open, pop up an error:
+    else {
+        Serial.println("error opening " + filename);
+    }
 
 
 }
