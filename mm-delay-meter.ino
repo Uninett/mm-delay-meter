@@ -1,12 +1,13 @@
 #include "src/measure_led.h"
+//#include "src/input_capture.h"
+#include "src/Timer3/Timer3.h"
 #include "src/signal_generator_timer.h"
 #include "src/signal_generator_led.h"
 #include "src/signal_generator_speaker.h"
-#include "src/Timer3/Timer3.h"
 #include "src/sd_card_datalogger.h"
 #include <Process.h>
 
-#define NUM_MEASUREMENTS  10
+#define MAX_NUM_MEASUREMENTS  5
 int num_measurements;
 
 void setup() {
@@ -20,6 +21,7 @@ void setup() {
   Bridge.begin();
   Serial.println("Bridge setup complete");
   measureLEDSetup();
+  //inputCaptureSetup();
   SGTimerSetup();
   SGLEDSetup();
   SGSpeakerSetup();
@@ -28,18 +30,7 @@ void setup() {
 
   num_measurements = 0;
 
-//  String result;
-//  Process time;
-//  // date is a command line utility to get the date and the time
-//  // in different formats depending on the additional parameter
-//  time.runShellCommand("date");
-//
-//  // read the output of the command
-//  while (time.available() > 0) {
-//    char c = time.read();
-//    result += c;
-//  }
-//  Serial.println(result);
+  
 }
 
 void loop() {
@@ -50,14 +41,17 @@ void loop() {
   measureLEDRisingEdgeDetection();
 
   if (measureLEDCheckFlag()){
+  //if (inputCaptureCheckFlag()){
     digitalWrite(lightSensorInterruptPin, LOW);
     //measureLEDPrintToSerial();
     /* Save values in SD card */
-    SDCardLogger("measurements.txt");
+    SDCardLogger("measurements.txt", num_measurements);
     num_measurements++;
   }
-  if (num_measurements >= NUM_MEASUREMENTS){
+  if (num_measurements >= MAX_NUM_MEASUREMENTS){
     /* Save measurements somewhere, try putty */
+    
+    SDCardPrintContent();
     digitalWrite(ledPin, LOW);
     while(1){};
   
