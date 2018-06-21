@@ -2,9 +2,11 @@
 
 
 void measureLEDInitializeSamples();
-unsigned short measureLEDMaxSmoothingFilter();
+uint16_t measureLEDMaxSmoothingFilter();
 void measureLEDRisingEdgeDetection();
 
+void measureLEDFromTimer1Setup();
+void measureLEDDelayFromTimer1();
 bool measureLEDCheckFlag();
 void measureLEDPrintToSerial();
 double measureLEDGetDelayMs();

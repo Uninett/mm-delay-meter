@@ -5,9 +5,10 @@
 #include "Arduino.h"
 #include "measure_led.h"
 #include "signal_generator_led.h"
+#include "timer1.h"
 #include "config.h"
 
-volatile bool led_flag;
+volatile bool measured_delay_flag;
 volatile unsigned short delta;
 volatile unsigned long deltaMicros;
 volatile bool sample_flag;
@@ -16,61 +17,36 @@ unsigned long num_runs;
 unsigned short samples[NUM_SAMPLES];
 
 
-void measureLEDSetup()
+void measureLEDFromTimer1Setup()
 {
-    // Timer 3 for measuring delay, 64us resolution
-    startUltraSlowCountingTimer3();
-    pauseTimer3();
-
-    led_flag = 0;
+    measured_delay_flag = 0;
     pinMode(lightSensorInterruptPin, OUTPUT);	// Can generate software interrupt
+    pinMode(lightSensorPin, INPUT);
     digitalWrite(lightSensorInterruptPin, LOW);
-    attachInterrupt(digitalPinToInterrupt(lightSensorInterruptPin), measureLEDDelay, RISING);
+    //attachInterrupt(digitalPinToInterrupt(lightSensorInterruptPin), measureLEDDelayFromTimer1, RISING);
 
     measureLEDInitializeSamples();
     num_runs = 0;
 }
 
-/* Interrupt service routine for external interrupt at pin 3, triggers when light is recieved at sensor */
-void measureLEDDelay()
+void measureLEDDelayFromTimer1()
 {
-    // Stop timer
-    pauseTimer3();
+	// Stop timer?
+    //pauseTimer1();
 
     // Save delay measurement
+    delta = readTimer1();
+    deltaMicros = microsFromCounting((unsigned long)delta);
 
-    // readTimer1() returns a maximum value of 65535
-    // That means the maximum possible delta one can measure with this
-    // function (when in ultra slow counting mode) is 4194ms on 16 MHz boards,
-    // and 2097ms on 8 MHz boards
-    delta = readTimer3();
-
-    // If you estimate deltaMicros could be > 65 ms, or 65535 us,
-    // delta should be cast to unsigned long, and deltaMicros should be
-    // created as an unsigned long variable
-    deltaMicros = microsFromUltraSlowCounting((unsigned long)delta);
-
-    led_flag = 1;
+    measured_delay_flag = 1;
 }
 
-// debug only
-// void printSensorValue(){
-//     // Read analog value (for "debug")
-//     unsigned short raw_sample = analogRead(lightSensorPin);
-//     Serial.print("Light sensor pin: ");
-//     Serial.println(raw_sample);
-// }
-// void printDelay(){
-// 	Serial.print("Light delay: ");
-// 	Serial.print(deltaMicros);
-// 	Serial.println(" us");
-// }
-//
+
 
 bool measureLEDCheckFlag()
 {
-	if (led_flag){ 
-    	led_flag = 0;
+	if (measured_delay_flag){ 
+    	measured_delay_flag = 0;
     	return true;
  	}
  	else{
@@ -80,7 +56,7 @@ bool measureLEDCheckFlag()
 
 void measureLEDPrintToSerial()
 {
-	Serial.println(deltaMicros/1000.0);
+	Serial.println(measureLEDGetDelayMs());
 }
 
 double measureLEDGetDelayMs()
@@ -91,20 +67,24 @@ double measureLEDGetDelayMs()
 
 
 /* Maximum smoothing filter */
+uint8_t current_index;
+uint16_t max_sample;
+uint8_t max_sample_index;
+
 void measureLEDInitializeSamples()
 {
 	for (uint8_t i = 0; i < NUM_SAMPLES; i++){
 		samples[i] = 0;
 	}
+	current_index = 0;
+	max_sample = 0;
+	max_sample_index = 0;
 }
 
-unsigned short measureLEDMaxSmoothingFilter()
-{
-	static uint8_t current_index;
-	static unsigned short max_sample;
-	static uint8_t max_sample_index;
 
-	unsigned short raw_sample = analogRead(lightSensorPin);
+uint16_t measureLEDMaxSmoothingFilter()
+{
+	uint16_t raw_sample = analogRead(lightSensorPin);
 
 	// Add sample to saved samples
 	samples[current_index] = raw_sample;
@@ -127,80 +107,48 @@ unsigned short measureLEDMaxSmoothingFilter()
 		max_sample_index = current_index;
 	}
 
-	if (current_index < NUM_SAMPLES - 1){
-		current_index++;
-	} else{
-		current_index = 0;
-	}
+	current_index = (current_index < NUM_SAMPLES - 1) ? current_index + 1 : 0;
 
 	return max_sample;
 }
 
 
 // Rising edge detection
+int16_t current_max;
+int16_t prev_max;
+int16_t prev_prev_max;
+bool edge_detected;
 void measureLEDRisingEdgeDetection()
 {
-	
-	int current_max = measureLEDMaxSmoothingFilter();
-	static int prev_max = current_max;
-	static int prev_prev_max = current_max;
+	delta = readTimer1();
 
-	// static int max_samples[NUM_MAX_SAMPLES] = {0};
-	// static uint8_t current_index;
+	current_max = measureLEDMaxSmoothingFilter();
 
-	bool edge_detected = false;
+	edge_detected = false;
 
 	if (num_runs >= 3 && !SGLEDCheckFlag()){
-		edge_detected = (current_max - prev_max > 10);
+		edge_detected = (current_max - prev_max > 20);
 		// Otherwise, compare previous 3 values. Increased >20 and strictly increasing
-		 if(!edge_detected){ 
-      		edge_detected = (current_max - prev_prev_max > 10 && current_max > prev_max && prev_max > prev_prev_max); 
+		if(!edge_detected){
+      		edge_detected = (current_max - prev_prev_max > 20 && current_max >= prev_max && prev_max >= prev_prev_max); 
     	}
 		
-		if (edge_detected){
-			digitalWrite(lightSensorInterruptPin, HIGH);
-			SGLEDSetFlag(1);	
-		}
+		
 	}
 	prev_prev_max = prev_max;
 	prev_max = current_max;
 
-
-	// max_samples[current_index] = current_max;
-	// if (num_runs >= NUM_MAX_SAMPLES && !SGLEDCheckFlag()){
-	// 	uint8_t i = 0;
-	// 	uint8_t j = NUM_MAX_SAMPLES - 1 - current_index;
-	// 	while(i < NUM_MAX_SAMPLES){
-	// 		if (i <= current_index){
-	// 			max_samples[current_index - i]
-	// 			// Check previous max samples, until current_i - i
-
-	// 		}
-	// 		else if (j > 0){
-	// 			max_samples[current_index + j]
-	// 			j--;
-	// 		}
-			
-
-	// 		i++;
-	// 	}
-
-	// 	if (edge_detected){
-	// 		digitalWrite(lightSensorInterruptPin, HIGH);
-	// 		SGLEDSetFlag(1);	
-	// 	}
-	// }
-		
-	// if (current_index < NUM_MAX_SAMPLES - 1){
-	// 	current_index++;
-	// } else{
-	// 	current_index = 0;
-	// }
+	if (edge_detected){
+		// Generate interrupt signal that reads the stopwatch
+		deltaMicros = microsFromCounting((unsigned long)delta);
+    	measured_delay_flag = 1;
+		digitalWrite(lightSensorInterruptPin, HIGH);
+		SGLEDSetFlag(1);
+	}
 	
 	num_runs++;
 }
 
-// bool measureLEDCompare(const int* max_samples, const uint8_t last_check_index, const uint8_t first_check_index)
 
 /* Sampling timer and sampling routine */
 
