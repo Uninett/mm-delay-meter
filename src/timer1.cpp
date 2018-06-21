@@ -79,7 +79,7 @@ void timer1ControlSetup()
 
 bool timer1CheckResetFlag()
 {
- 	if (timer_reset_flag){ 
+ 	if (timer_reset_flag){
  		timer_reset_flag = 0;
     	return true;
  	}
@@ -88,7 +88,3 @@ bool timer1CheckResetFlag()
  	}
 }
 
-void timer1ClearResetFlag()
-{
-	timer_reset_flag = 0;
-}

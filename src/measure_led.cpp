@@ -218,7 +218,8 @@ void samplingSetup()
 ISR(TIMER3_COMPA_vect)
 {
 	// Handle sampling
-	measureLEDRisingEdgeDetection();
+	sample_flag = 1;
+	//measureLEDRisingEdgeDetection();
 }
 
 bool samplingCheckFlag()

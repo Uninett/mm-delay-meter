@@ -1,7 +1,5 @@
 #include "src/measure_led.h"
 #include "src/timer1.h"
-//#include "src/Timer3/Timer3.h"
-//#include "src/signal_generator_timer.h"
 #include "src/signal_generator_led.h"
 #include "src/signal_generator_speaker.h"
 #include "src/sd_card_datalogger.h"
@@ -17,13 +15,11 @@ void setup() {
   while(!Serial);
   Serial.println("Hello Yún!");
 
-//  // Bridge startup
+  // Bridge startup
   Bridge.begin();
   Serial.println("Bridge setup complete");
   
-  //measureLEDSetup();
   measureLEDFromTimer1Setup();
-  //SGTimerSetup();
   SGLEDSetup();
   SGSpeakerSetup();
   SDCardSetup();
@@ -33,6 +29,7 @@ void setup() {
   num_measurements = 0;
   resumeTimer1();
   resumeTimer3();
+
 }
 
 void loop() {
@@ -43,16 +40,14 @@ void loop() {
   if (timer1CheckResetFlag()){
     // Turn on led and start timer
     SGLEDOn();
-    //timer1ClearResetFlag();
   }
 
   //measureLEDRisingEdgeDetection();
-//  if (samplingCheckFlag()){
-//    measureLEDRisingEdgeDetection();
-//  }
+  if (samplingCheckFlag()){
+    measureLEDRisingEdgeDetection();
+  }
   if (measureLEDCheckFlag()){
     digitalWrite(lightSensorInterruptPin, LOW);
-    //measureLEDPrintToSerial();
     /* Save values in SD card */
     SDCardLogger("measurements.txt", num_measurements);
     num_measurements++;
@@ -63,7 +58,8 @@ void loop() {
     SDCardPrintContent();
     digitalWrite(ledPin, LOW);
     while(1){};
-  
   }
+
+
  
 }
