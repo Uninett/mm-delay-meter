@@ -28,10 +28,12 @@ void setup() {
   SGSpeakerSetup();
   
   SDCardSetup();
+  samplingSetup();
 
   num_measurements = 0;
 
   
+  resumeTimer3();
 }
 
 void loop() {
@@ -41,6 +43,9 @@ void loop() {
   }
   measureLEDRisingEdgeDetection();
 
+//  if (samplingCheckFlag()){
+//    measureLEDRisingEdgeDetection();
+//  }
   if (measureLEDCheckFlag()){
   //if (inputCaptureCheckFlag()){
     digitalWrite(lightSensorInterruptPin, LOW);
@@ -50,8 +55,8 @@ void loop() {
     num_measurements++;
   }
   if (num_measurements >= MAX_NUM_MEASUREMENTS){
-    /* Save measurements somewhere, try putty */
-    
+    /* Print saved measurements */
+    pauseTimer3();
     SDCardPrintContent();
     digitalWrite(ledPin, LOW);
     while(1){};
