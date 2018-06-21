@@ -22,18 +22,21 @@ void setup() {
 //  // Bridge startup
   Bridge.begin();
   Serial.println("Bridge setup complete");
-  measureLEDSetup();
-  //inputCaptureSetup();
-  SGTimerSetup();
+  
+  //measureLEDSetup();
+  measureLEDFromTimer1Setup();
+  //SGTimerSetup();
   SGLEDSetup();
   SGSpeakerSetup();
   
   SDCardSetup();
+  timer1ControlSetup();
   samplingSetup();
 
   num_measurements = 0;
 
   
+  resumeTimer1();
   resumeTimer3();
 }
 
@@ -47,8 +50,8 @@ void loop() {
     SGLEDOn();
     //timer1ClearResetFlag();
   }
-  measureLEDRisingEdgeDetection();
 
+  //measureLEDRisingEdgeDetection();
 //  if (samplingCheckFlag()){
 //    measureLEDRisingEdgeDetection();
 //  }
