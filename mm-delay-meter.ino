@@ -1,7 +1,8 @@
 #include "src/measure_led.h"
 //#include "src/input_capture.h"
-#include "src/Timer3/Timer3.h"
 #include "src/signal_generator_timer.h"
+#include "src/timer1.h"
+//#include "src/Timer3/Timer3.h"
 #include "src/signal_generator_led.h"
 #include "src/signal_generator_speaker.h"
 #include "src/sd_card_datalogger.h"
@@ -37,9 +38,14 @@ void setup() {
 }
 
 void loop() {
-  if (SGTimerCheckFlag()){
-    SGLEDToggle();
-    SGSpeakerPlaySound();
+//  if (SGTimerCheckFlag()){
+//    SGLEDToggle();
+//    SGSpeakerPlaySound();
+//  }
+  if (timer1CheckResetFlag()){
+    // Turn on led and start timer
+    SGLEDOn();
+    //timer1ClearResetFlag();
   }
   measureLEDRisingEdgeDetection();
 
