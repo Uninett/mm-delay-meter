@@ -6,6 +6,7 @@
 #include "measure_led.h"
 #include "Timer3/Timer3.h"
 #include "signal_generator_led.h"
+#include "config.h"
 
 volatile bool led_flag;
 volatile unsigned short delta;

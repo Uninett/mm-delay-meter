@@ -3,6 +3,7 @@
 
 #include "signal_generator_timer.h"
 #include "Arduino.h"
+#include "config.h"
 volatile int out_flag;
 
 

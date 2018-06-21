@@ -4,6 +4,7 @@
 #include "signal_generator_speaker.h"
 #include "signal_generator_timer.h"
 #include "Arduino.h"
+#include "config.h"
 
 void SGSpeakerSetup(){
 	pinMode(speakerPin, OUTPUT);

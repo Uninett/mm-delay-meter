@@ -4,6 +4,7 @@
 #include "signal_generator_timer.h"
 #include "Timer3/Timer3.h"
 //#include "input_capture.h"
+#include "config.h"
 
 bool light_recieved_at_sensor;
 

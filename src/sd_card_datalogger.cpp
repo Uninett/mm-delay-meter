@@ -4,6 +4,7 @@
 #include "sd_card_datalogger.h"
 #include "measure_led.h"
 //#include "input_capture.h"
+#include "config.h"
 
 void SDCardSetup() {
     // Initialize the Bridge and the Serial

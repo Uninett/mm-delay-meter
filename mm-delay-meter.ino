@@ -5,6 +5,7 @@
 #include "src/signal_generator_led.h"
 #include "src/signal_generator_speaker.h"
 #include "src/sd_card_datalogger.h"
+#include "src/config.h"
 #include <Process.h>
 
 #define MAX_NUM_MEASUREMENTS  5
