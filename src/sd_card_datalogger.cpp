@@ -3,7 +3,6 @@
 #include <FileIO.h>
 #include "sd_card_datalogger.h"
 #include "measure_led.h"
-//#include "input_capture.h"
 #include "config.h"
 
 void SDCardSetup() {
@@ -43,7 +42,6 @@ void SDCardLogger(String filename, int num) {
     }
 
     double delay = measureLEDGetDelayMs();
-    //double delay = inputCaptureGetDelayMs();
     dataString = String(num);
     dataString += "\t";
     dataString += String(delay);

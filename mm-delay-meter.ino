@@ -1,21 +1,19 @@
 #include "src/measure_led.h"
-//#include "src/input_capture.h"
-#include "src/signal_generator_timer.h"
 #include "src/timer1.h"
 //#include "src/Timer3/Timer3.h"
+//#include "src/signal_generator_timer.h"
 #include "src/signal_generator_led.h"
 #include "src/signal_generator_speaker.h"
 #include "src/sd_card_datalogger.h"
 #include "src/config.h"
 #include <Process.h>
 
-#define MAX_NUM_MEASUREMENTS  5
+#define MAX_NUM_MEASUREMENTS  20
 int num_measurements;
 
 void setup() {
   
   Serial.begin(9600);
-  
   while(!Serial);
   Serial.println("Hello Yún!");
 
@@ -28,14 +26,11 @@ void setup() {
   //SGTimerSetup();
   SGLEDSetup();
   SGSpeakerSetup();
-  
   SDCardSetup();
   timer1ControlSetup();
   samplingSetup();
 
   num_measurements = 0;
-
-  
   resumeTimer1();
   resumeTimer3();
 }
@@ -56,7 +51,6 @@ void loop() {
 //    measureLEDRisingEdgeDetection();
 //  }
   if (measureLEDCheckFlag()){
-  //if (inputCaptureCheckFlag()){
     digitalWrite(lightSensorInterruptPin, LOW);
     //measureLEDPrintToSerial();
     /* Save values in SD card */
