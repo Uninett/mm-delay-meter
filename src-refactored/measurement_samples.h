@@ -2,14 +2,12 @@
 
 #include <inttypes.h>
 
-extern volatile unsigned long deltaMicros;
-#define measurementSamplesGetDelayMs() deltaMicros/1000.0
-
 void measurementSamplesSetup();
 bool measurementSamplesCheckMeasuredFlag();
+double measurementSamplesGetDelayMs();
 
 void measurementSamplesInitialize();
-uint16_t measurementSamplesMaxSmoothingFilter();
+int16_t measurementSamplesMaxSmoothingFilter();
 void measurementSamplesRisingEdgeDetection();
 
 void measurementSamplesClearLightRecievedFlag();

@@ -8,8 +8,8 @@
 
 bool light_recieved_at_sensor_flag;
 bool measured_delay_flag;
-volatile unsigned short delta;
-volatile unsigned long deltaMicros;
+unsigned short delta;
+unsigned long deltaMicros;
 unsigned long num_runs;
 
 int16_t samples[NUM_SAMPLES];
@@ -18,6 +18,7 @@ void measurementSamplesSetup()
 {
 	// Initialize measurement series
 	measured_delay_flag = 0;
+	light_recieved_at_sensor_flag = 0;
     pinMode(lightSensorPin, INPUT);
     measurementSamplesInitialize();
     num_runs = 0;
@@ -55,10 +56,14 @@ void measurementSamplesInitialize()
 	max_sample_index = 0;
 }
 
-
-uint16_t measurementSamplesMaxSmoothingFilter()
+double measurementSamplesGetDelayMs()
 {
-	uint16_t raw_sample = analogRead(lightSensorPin);
+	return deltaMicros/1000.0;
+}
+
+int16_t measurementSamplesMaxSmoothingFilter()
+{
+	int16_t raw_sample = analogRead(lightSensorPin);
 
 	// Add sample to saved samples
 	samples[current_index] = raw_sample;
@@ -97,25 +102,31 @@ void measurementSamplesRisingEdgeDetection()
 	// Get timestamp as early as possible
 	delta = readTimer1();
 
-	current_max = measurementSamplesMaxSmoothingFilter();
+	current_max = analogRead(lightSensorPin);//measurementSamplesMaxSmoothingFilter();
+
 	edge_detected = false;
 
 	if (num_runs >= 3 && !light_recieved_at_sensor_flag){
-		edge_detected = (current_max - prev_max > 20);
+		edge_detected = (current_max - prev_max > 10);
 		// Otherwise, compare previous 3 values. Increased >20 and strictly increasing
 		if(!edge_detected){
-      		edge_detected = (current_max - prev_prev_max > 20 && current_max >= prev_max && prev_max >= prev_prev_max); 
+      		edge_detected = (current_max - prev_prev_max > 10 && current_max >= prev_max && prev_max >= prev_prev_max); 
+      		if(current_max - prev_prev_max > 10) Serial.println(current_max - prev_prev_max);
+      		else if(current_max - prev_max > 10) Serial.println(current_max - prev_max);
     	}
+    	if (edge_detected){
+			deltaMicros = microsFromCounting((unsigned long)delta);
+			Serial.println(current_max);
+			Serial.println(prev_max);
+	    	measured_delay_flag = 1;
+			//digitalWrite(lightSensorInterruptPin, HIGH);
+			light_recieved_at_sensor_flag = 1;
+		}
 	}
 	prev_prev_max = prev_max;
 	prev_max = current_max;
 
-	if (edge_detected){
-		deltaMicros = microsFromCounting((unsigned long)delta);
-    	measured_delay_flag = 1;
-		//digitalWrite(lightSensorInterruptPin, HIGH);
-		light_recieved_at_sensor_flag = 1;
-	}
+	
 	
 	num_runs++;
 }
