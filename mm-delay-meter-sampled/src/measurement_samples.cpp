@@ -1,4 +1,4 @@
-/* Samples the light sensor every 140us, and measures delay since light was sent to the LED.
+/* Samples the light sensor every 200us, and measures delay since light was sent to the LED.
  * Implements a maximum smoothin filter and rising edge detection for detecting 
  * a recieved light pulse. */
 #include "measurement_samples.h"
@@ -102,7 +102,7 @@ void measurementSamplesRisingEdgeDetection()
 	// Get timestamp as early as possible
 	delta = readTimer1();
 
-	current_max = analogRead(lightSensorPin);//measurementSamplesMaxSmoothingFilter();
+	current_max = analogRead(lightSensorPin); //measurementSamplesMaxSmoothingFilter();  //?
 
 	edge_detected = false;
 

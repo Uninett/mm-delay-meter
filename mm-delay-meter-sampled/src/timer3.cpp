@@ -24,7 +24,7 @@ void startTimer3(void) {
 	// Enable compare match 3A interrupt
 	TIMSK3 = B00000010;
 	// Match at TCNT3 = 35: 140us
-	OCR3A = 100;
+	OCR3A = 50;
 	resumeTimer3();
 }
 uint16_t readTimer3(void) {
