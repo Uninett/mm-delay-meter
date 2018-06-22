@@ -1,65 +1,51 @@
-#include "src/measure_led.h"
-#include "src/timer1.h"
+#include "src/input_capture_aco.h"
+#include "src/signal_generator_timer3.h"
 #include "src/signal_generator_led.h"
 #include "src/signal_generator_speaker.h"
 #include "src/sd_card_datalogger.h"
-#include "src/config.h"
 #include <Process.h>
 
-#define MAX_NUM_MEASUREMENTS  20
+#define MAX_NUM_MEASUREMENTS  10
 int num_measurements;
 
 void setup() {
   
   Serial.begin(9600);
+  
   while(!Serial);
   Serial.println("Hello Yún!");
 
   // Bridge startup
   Bridge.begin();
   Serial.println("Bridge setup complete");
-  
-  measureLEDFromTimer1Setup();
+  inputCaptureACOSetup();
+  SGTimer3Setup();
   SGLEDSetup();
   SGSpeakerSetup();
   SDCardSetup();
-  timer1ControlSetup();
-  samplingSetup();
 
   num_measurements = 0;
-  resumeTimer1();
-  resumeTimer3();
 
+  
 }
 
 void loop() {
-//  if (SGTimerCheckFlag()){
-//    SGLEDToggle();
-//    SGSpeakerPlaySound();
-//  }
-  if (timer1CheckResetFlag()){
-    // Turn on led and start timer
-    SGLEDOn();
+  if (SGTimer3CheckFlag()){
+    SGLEDToggle();
+    SGSpeakerPlaySound();
   }
 
-  //measureLEDRisingEdgeDetection();
-  if (samplingCheckFlag()){
-    measureLEDRisingEdgeDetection();
-  }
-  if (measureLEDCheckFlag()){
-    digitalWrite(lightSensorInterruptPin, LOW);
+  if (inputCaptureACOCheckFlag()){
     /* Save values in SD card */
     SDCardLogger("measurements.txt", num_measurements);
     num_measurements++;
   }
   if (num_measurements >= MAX_NUM_MEASUREMENTS){
-    /* Print saved measurements */
-    pauseTimer3();
+    /* Save measurements somewhere, try putty */
+    
     SDCardPrintContent();
     digitalWrite(ledPin, LOW);
     while(1){};
   }
-
-
  
 }

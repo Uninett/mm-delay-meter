@@ -2,8 +2,7 @@
 
 #include <FileIO.h>
 #include "sd_card_datalogger.h"
-#include "measure_led.h"
-#include "config.h"
+#include "input_capture_aco.h"
 
 void SDCardSetup() {
     // Initialize the Bridge and the Serial
@@ -41,7 +40,7 @@ void SDCardLogger(String filename, int num) {
         }
     }
 
-    double delay = measureLEDGetDelayMs();
+    double delay = inputCaptureACOGetDelayMs();
     dataString = String(num);
     dataString += "\t";
     dataString += String(delay);
