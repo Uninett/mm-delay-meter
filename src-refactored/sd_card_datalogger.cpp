@@ -16,29 +16,30 @@ void SDCardLogger(String filename, int num) {
     // so you have to close this one before opening another.
     File dataFile = FileSystem.open(("/mnt/sd/" + filename).c_str(), FILE_APPEND);
 
+    //Serial.println("SD card logging...");
     // make a string that start with a timestamp for assembling the data to log:
     String dataString;
-    if (num == 0){
-        Process time;
-        time.runShellCommand("date");
-
-        // read the output of the command
-        while (time.running());
-        while (time.available() > 0) {
-            char c = time.read();
-            dataString += c;
-        }
-        // if the file is available, write to it:
-        if (dataFile) {
-            dataFile.print(dataString);
-            Serial.print(dataString);
-        }
-        // if the file isn't open, pop up an error:
-        else {
-            Serial.println("error opening " + filename);
-            return;
-        }
-    }
+    // if (num == 0){
+    //     Process time;
+    //     Serial.println("hm");
+    //     time.runShellCommand("date");
+    //     // read the output of the command
+    //     //while (time.running());
+    //     while (time.available() > 0) {
+    //         char c = time.read();
+    //         dataString += c;
+    //     }
+    //     // if the file is available, write to it:
+    //     if (dataFile) {
+    //         dataFile.print(dataString);
+    //         Serial.print(dataString);
+    //     }
+    //     // if the file isn't open, pop up an error:
+    //     else {
+    //         Serial.println("error opening " + filename);
+    //         return;
+    //     }
+    // }
 
     double delay = measurementSamplesGetDelayMs();
     dataString = String(num);
