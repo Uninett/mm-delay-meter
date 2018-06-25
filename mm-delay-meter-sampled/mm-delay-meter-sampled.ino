@@ -29,23 +29,26 @@ void setup() {
 }
 
 void loop() {
-  //Serial.println(1);
   if (timer1CheckOvfFlag()){
     // Turn on led and start stopwatch
     signalGeneratorLEDOn();
+    // Turn on speaker
+    signalGeneratorSpeakerOn();
   }
   if (timer1CheckCompFlag()){
     // Turn off LED
     signalGeneratorLEDOff();
+    // Turn off speaker
+    signalGeneratorSpeakerOff();
   }
   if (timer3CheckSamplingFlag()){
     // Measure light
-    measurementSamplesRisingEdgeDetection();
+    // measurementSamplesRisingEdgeDetection();
+    // Measure sound
+    measurementSamplesRisingEdgeDetectionSound();
   }
   if (measurementSamplesCheckMeasuredFlag()){
     SDCardLogger("measurements.txt", num_measurements);
     num_measurements++;
   }
-
- 
 }

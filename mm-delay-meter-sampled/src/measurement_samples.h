@@ -9,5 +9,7 @@ double measurementSamplesGetDelayMs();
 void measurementSamplesInitialize();
 int16_t measurementSamplesMaxSmoothingFilter();
 void measurementSamplesRisingEdgeDetection();
+void measurementSamplesRisingEdgeDetectionSound();
 
 void measurementSamplesClearLightRecievedFlag();
+void measurementSamplesClearSoundRecievedFlag();

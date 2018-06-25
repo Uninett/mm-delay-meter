@@ -7,8 +7,6 @@
 #include "measurement_samples.h"
 #include "config.h"
 
-//bool light_recieved_at_sensor;
-
 void signalGeneratorSetup()
 {
 	// LED setup
@@ -21,6 +19,7 @@ void signalGeneratorSetup()
 
 	// Speaker setup
 	pinMode(speakerPin, OUTPUT);
+	pinMode(10, OUTPUT);
 
  	TCNT0 = 0;
 	// Toggle OC0A on compare match in CTC mode
@@ -34,8 +33,7 @@ void signalGeneratorSetup()
 }
 
 void signalGeneratorLEDOn()
-{
-	//light_recieved_at_sensor = 0;
+{	
 	measurementSamplesClearLightRecievedFlag();
 	resetTimer1();		// Redundant? It has already overflowed		
 	digitalWrite(ledPin, HIGH);
@@ -48,11 +46,15 @@ void signalGeneratorLEDOff()
 
 void signalGeneratorSpeakerOn()
 {
-	resumeTimer0();
+	measurementSamplesClearSoundRecievedFlag();
+	resetTimer1();
+	//resumeTimer0();
+	digitalWrite(10, HIGH);
 }
 
 void signalGeneratorSpeakerOff()
 {
 	pauseTimer0();
-	resetTimer0Unsafe();
+	//resetTimer0Unsafe();
+	digitalWrite(10, LOW);
 }

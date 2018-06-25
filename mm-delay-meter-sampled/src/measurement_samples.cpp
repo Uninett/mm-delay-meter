@@ -1,5 +1,5 @@
-/* Samples the light sensor every 200us, and measures delay since light was sent to the LED.
- * Implements a maximum smoothin filter and rising edge detection for detecting 
+/* Samples the light sensor every 200us (5kHz), and measures delay since light was sent to the LED.
+ * Implements a maximum smoothing filter and rising edge detection for detecting 
  * a recieved light pulse. */
 #include "measurement_samples.h"
 #include "timer3.h"
@@ -7,6 +7,7 @@
 #include "config.h"
 
 bool light_recieved_at_sensor_flag;
+bool sound_recieved_at_mic_flag;
 bool measured_delay_flag;
 unsigned short delta;
 unsigned long deltaMicros;
@@ -19,7 +20,9 @@ void measurementSamplesSetup()
 	// Initialize measurement series
 	measured_delay_flag = 0;
 	light_recieved_at_sensor_flag = 0;
+	sound_recieved_at_mic_flag = 0;
     pinMode(lightSensorPin, INPUT);
+    pinMode(microphonePin, INPUT);
     measurementSamplesInitialize();
     num_runs = 0;
 
@@ -102,7 +105,7 @@ void measurementSamplesRisingEdgeDetection()
 	// Get timestamp as early as possible
 	delta = readTimer1();
 
-	current_max = analogRead(lightSensorPin); //measurementSamplesMaxSmoothingFilter();  //?
+	current_max = measurementSamplesMaxSmoothingFilter();  //analogRead(lightSensorPin); //?
 
 	edge_detected = false;
 
@@ -125,10 +128,37 @@ void measurementSamplesRisingEdgeDetection()
 	}
 	prev_prev_max = prev_max;
 	prev_max = current_max;
-
-	
-	
 	num_runs++;
+}
+
+
+void measurementSamplesRisingEdgeDetectionSound()
+{
+	static int16_t sample_count = 1;
+	// Get timestamp as early as possible
+	delta = readTimer1();
+
+	current_max = analogRead(microphonePin); //?
+	edge_detected = false;
+
+	if (num_runs >= 3 && !sound_recieved_at_mic_flag){
+		edge_detected = (current_max - prev_max > 10);
+		// Otherwise, compare previous 3 values. Increased >20 and strictly increasing
+		if(!edge_detected){
+      		edge_detected = (current_max - prev_prev_max > 10 && current_max >= prev_max && prev_max >= prev_prev_max); 
+    	}
+    	if (edge_detected){
+			deltaMicros = microsFromCounting((unsigned long)delta);
+	    	measured_delay_flag = 1;
+			sound_recieved_at_mic_flag = 1;
+			Serial.println(sample_count);
+			sample_count = 0;
+		}
+	}
+	prev_prev_max = prev_max;
+	prev_max = current_max;
+	num_runs++;
+	sample_count++;
 }
 
 
@@ -136,4 +166,9 @@ void measurementSamplesRisingEdgeDetection()
 void measurementSamplesClearLightRecievedFlag()
 {
 	light_recieved_at_sensor_flag = 0;
+}
+
+void measurementSamplesClearSoundRecievedFlag()
+{
+	sound_recieved_at_mic_flag = 0;
 }
