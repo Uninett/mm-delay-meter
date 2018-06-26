@@ -7,30 +7,36 @@
 #include "measurement_samples.h"
 #include "config.h"
 
-void signalGeneratorSetup()
+void signalGeneratorSetup(int mode)
 {
-	// LED setup
 	timer1ClearFlags();
 	startTimer1();
 	pauseTimer1();
 
-	pinMode(ledPin, OUTPUT);
-	digitalWrite(ledPin, LOW);
+	switch (mode)
+	{
+		case SOUND_MODE:
+			// Speaker setup
+			pinMode(speakerPin, OUTPUT);
+			pinMode(buzzerPin, OUTPUT);
 
-	// Speaker setup
-	pinMode(speakerPin, OUTPUT);
-	pinMode(buzzerPin, OUTPUT);
-
- 	TCNT0 = 0;
-	// Toggle OC0A on compare match in CTC mode
-	TCCR0A = B01000010;
-	// Prescaler = 64
-	TCCR0B = B00000011;
-	// Compare match at 16MHz/(ps*f*2), ps = 64, f = 500Hz
-	OCR0A = 250;
-	pauseTimer0();
-	signalGeneratorSpeakerOff();
-
+			// Timer0:
+			TCNT0 = 0;
+			// Toggle OC0A on compare match in CTC mode
+			TCCR0A = B01000010;
+			// Prescaler = 64
+			TCCR0B = B00000011;
+			// Compare match at 16MHz/(ps*f*2), ps = 64, f = 500Hz
+			OCR0A = 250;
+			pauseTimer0();
+			signalGeneratorSpeakerOff();
+			//break;
+		case VIDEO_MODE:
+			// LED setup
+			pinMode(ledPin, OUTPUT);
+			digitalWrite(ledPin, LOW);
+			break;
+	}
 }
 
 void signalGeneratorLEDOn()

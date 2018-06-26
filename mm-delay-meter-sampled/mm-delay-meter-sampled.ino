@@ -8,6 +8,7 @@
 
 #define MAX_NUM_MEASUREMENTS  20
 int num_measurements;
+const int mode = SOUND_MODE;
 
 void setup() {
   
@@ -20,7 +21,7 @@ void setup() {
   Serial.println("Bridge setup complete");
 
   SDCardSetup();
-  signalGeneratorSetup();
+  signalGeneratorSetup(mode);
   measurementSamplesSetup();
   
   resumeTimer1();
@@ -33,19 +34,23 @@ void loop() {
     // Turn on led and start stopwatch
     signalGeneratorLEDOn();
     // Turn on speaker
-    signalGeneratorSpeakerOn();
+    if (mode == SOUND_MODE){
+      signalGeneratorSpeakerOn();
+    }
   }
   if (timer1CheckCompFlag()){
     // Turn off LED
     signalGeneratorLEDOff();
     // Turn off speaker
-    signalGeneratorSpeakerOff();
+    if (mode == SOUND_MODE){
+      signalGeneratorSpeakerOff();
+    }
   }
   if (timer3CheckSamplingFlag()){
     // Measure light
-    // measurementSamplesRisingEdgeDetection();
+    measurementSamplesRisingEdgeDetection(mode);
     // Measure sound
-    measurementSamplesRisingEdgeDetectionSound();
+    //measurementSamplesRisingEdgeDetectionSound();
   }
   if (measurementSamplesCheckMeasuredFlag()){
     SDCardLogger("measurements.txt", num_measurements);

@@ -8,8 +8,11 @@ double measurementSamplesGetDelayMs();
 
 void measurementSamplesInitialize();
 int16_t measurementSamplesMaxSmoothingFilter();
-void measurementSamplesRisingEdgeDetection();
+void measurementSamplesRisingEdgeDetection(int mode);
+void measurementSamplesRisingEdgeDetectionVideo();
 void measurementSamplesRisingEdgeDetectionSound();
 
 void measurementSamplesClearLightRecievedFlag();
 void measurementSamplesClearSoundRecievedFlag();
+
+void setIdleMicVal(int val);

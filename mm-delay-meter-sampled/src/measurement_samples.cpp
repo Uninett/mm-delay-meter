@@ -12,6 +12,7 @@ bool measured_delay_flag;
 unsigned short delta;
 unsigned long deltaMicros;
 unsigned long num_runs;
+int idle_mic_val;
 
 int16_t samples[NUM_SAMPLES];
 
@@ -100,7 +101,20 @@ int16_t prev_max;
 int16_t prev_prev_max;
 bool edge_detected;
 
-void measurementSamplesRisingEdgeDetection()
+void measurementSamplesRisingEdgeDetection(int mode)
+{
+	switch (mode)
+	{
+		case VIDEO_MODE:
+			measurementSamplesRisingEdgeDetectionVideo();
+			break;
+		case SOUND_MODE:
+			measurementSamplesRisingEdgeDetectionSound();
+			break;
+	}
+}
+
+void measurementSamplesRisingEdgeDetectionVideo()
 {
 	// Get timestamp as early as possible
 	delta = readTimer1();
@@ -114,15 +128,10 @@ void measurementSamplesRisingEdgeDetection()
 		// Otherwise, compare previous 3 values. Increased >20 and strictly increasing
 		if(!edge_detected){
       		edge_detected = (current_max - prev_prev_max > 10 && current_max >= prev_max && prev_max >= prev_prev_max); 
-      		if(current_max - prev_prev_max > 10) Serial.println(current_max - prev_prev_max);
-      		else if(current_max - prev_max > 10) Serial.println(current_max - prev_max);
     	}
     	if (edge_detected){
 			deltaMicros = microsFromCounting((unsigned long)delta);
-			Serial.println(current_max);
-			Serial.println(prev_max);
 	    	measured_delay_flag = 1;
-			//digitalWrite(lightSensorInterruptPin, HIGH);
 			light_recieved_at_sensor_flag = 1;
 		}
 	}
@@ -131,6 +140,10 @@ void measurementSamplesRisingEdgeDetection()
 	num_runs++;
 }
 
+void setIdleMicVal(int val)
+{
+	idle_mic_val = val;
+}
 
 void measurementSamplesRisingEdgeDetectionSound()
 {
@@ -138,15 +151,16 @@ void measurementSamplesRisingEdgeDetectionSound()
 	// Get timestamp as early as possible
 	delta = readTimer1();
 
-	current_max = analogRead(microphonePin); //?
+	current_max = analogRead(microphonePin);
 	edge_detected = false;
 
 	if (num_runs >= 3 && !sound_recieved_at_mic_flag){
-		edge_detected = (current_max - prev_max > 10);
-		// Otherwise, compare previous 3 values. Increased >20 and strictly increasing
-		if(!edge_detected){
-      		edge_detected = (current_max - prev_prev_max > 10 && current_max >= prev_max && prev_max >= prev_prev_max); 
-    	}
+		edge_detected = (current_max > idle_mic_val);
+		//if (edge_detected) Serial.println(current_max - idle_mic_val);
+		// Otherwise, compare previous 3 values. Increased >10 and strictly increasing
+		// if(!edge_detected){
+  //     		edge_detected = (current_max - prev_prev_max > 10 && current_max >= prev_max && prev_max >= prev_prev_max); 
+  //   	}
     	if (edge_detected){
 			deltaMicros = microsFromCounting((unsigned long)delta);
 	    	measured_delay_flag = 1;
@@ -154,11 +168,11 @@ void measurementSamplesRisingEdgeDetectionSound()
 			Serial.println(sample_count);
 			sample_count = 0;
 		}
+		sample_count++;
 	}
 	prev_prev_max = prev_max;
 	prev_max = current_max;
 	num_runs++;
-	sample_count++;
 }
 
 

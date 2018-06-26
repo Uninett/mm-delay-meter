@@ -10,4 +10,7 @@
 #define NUM_MAX_SAMPLES				10
 #define NUM_SAMPLES 				10
 
+#define VIDEO_MODE            1
+#define SOUND_MODE            2
+
 #include "Arduino.h"
