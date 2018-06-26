@@ -1,4 +1,4 @@
-/* Timer1 controls the LED on/off and the stopwatch that measures delay.
+/* Timer1 controls the LED and speaker on/off and the stopwatch that measures delay.
  * Has a period of 4194 ms before timer overflow, and a resolution of 64us. */
 
 #include "timer1.h"

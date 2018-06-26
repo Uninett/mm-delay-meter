@@ -23,7 +23,7 @@ void startTimer3(void) {
 	TIFR3 = 0;
 	// Enable compare match 3A interrupt
 	TIMSK3 = B00000010;
-	// Match at TCNT3 = 35: 140us
+	// Match at TCNT3 = 50: 200us
 	OCR3A = 50;
 	resumeTimer3();
 }
