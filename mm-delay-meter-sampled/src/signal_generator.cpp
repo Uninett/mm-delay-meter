@@ -19,7 +19,7 @@ void signalGeneratorSetup()
 
 	// Speaker setup
 	pinMode(speakerPin, OUTPUT);
-	pinMode(10, OUTPUT);
+	pinMode(buzzerPin, OUTPUT);
 
  	TCNT0 = 0;
 	// Toggle OC0A on compare match in CTC mode
@@ -28,6 +28,7 @@ void signalGeneratorSetup()
 	TCCR0B = B00000011;
 	// Compare match at 16MHz/(ps*f*2), ps = 64, f = 500Hz
 	OCR0A = 250;
+	pauseTimer0();
 	signalGeneratorSpeakerOff();
 
 }
@@ -49,12 +50,12 @@ void signalGeneratorSpeakerOn()
 	measurementSamplesClearSoundRecievedFlag();
 	resetTimer1();
 	//resumeTimer0();
-	digitalWrite(10, HIGH);
+	digitalWrite(buzzerPin, HIGH);
 }
 
 void signalGeneratorSpeakerOff()
 {
-	pauseTimer0();
+	//pauseTimer0();
 	//resetTimer0Unsafe();
-	digitalWrite(10, LOW);
+	digitalWrite(buzzerPin, LOW);
 }

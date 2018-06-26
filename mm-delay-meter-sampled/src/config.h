@@ -2,6 +2,7 @@
 
 #define lightSensorInterruptPin		7
 #define speakerPin  				11	// OC0A
+#define buzzerPin					10
 #define ledPin  					12
 #define lightSensorPin				A0
 #define microphonePin				A1
