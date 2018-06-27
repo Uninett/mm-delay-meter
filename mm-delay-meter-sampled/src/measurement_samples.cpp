@@ -99,6 +99,7 @@ int16_t measurementSamplesMaxSmoothingFilter()
 int16_t current_max;
 int16_t prev_max;
 int16_t prev_prev_max;
+int16_t acc_pos_slopes;
 bool edge_detected;
 
 void measurementSamplesRisingEdgeDetection(int mode)
@@ -116,26 +117,34 @@ void measurementSamplesRisingEdgeDetection(int mode)
 
 void measurementSamplesRisingEdgeDetectionVideo()
 {
+	static int16_t acc_pos_slopes;
 	// Get timestamp as early as possible
 	delta = readTimer1();
 
 	current_max = measurementSamplesMaxSmoothingFilter();  //analogRead(lightSensorPin); //?
-
 	edge_detected = false;
 
 	if (num_runs >= 3 && !light_recieved_at_sensor_flag){
-		edge_detected = (current_max - prev_max > 10);
-		// Otherwise, compare previous 3 values. Increased >20 and strictly increasing
-		if(!edge_detected){
-      		edge_detected = (current_max - prev_prev_max > 10 && current_max >= prev_max && prev_max >= prev_prev_max); 
-    	}
+		if (current_max - prev_max > 10){
+			edge_detected = true;
+		}
+		else{
+			if (current_max > prev_max){
+				acc_pos_slopes++;
+			} 
+			else acc_pos_slopes = 0;
+			if (acc_pos_slopes >= 5){
+				edge_detected = true;
+			}
+		}
+		
     	if (edge_detected){
 			deltaMicros = microsFromCounting((unsigned long)delta);
 	    	measured_delay_flag = 1;
 			light_recieved_at_sensor_flag = 1;
+			acc_pos_slopes = 0;
 		}
 	}
-	prev_prev_max = prev_max;
 	prev_max = current_max;
 	num_runs++;
 }
