@@ -27,8 +27,8 @@ void setup() {
   
 
   // Calibrate microphone measurements
-  Serial.println("Calibrating microphone...");
   if(mode == SOUND_MODE){
+    Serial.println("Calibrating microphone...");
     int prev_mic;
     int current_mic = analogRead(microphonePin);
     prev_mic = current_mic;
@@ -74,7 +74,7 @@ void setup() {
 }
 
 void loop() {
-  if (timer1CheckOvfFlag()){
+  if (timer1CheckFlag(OVF)){
     // Turn on led and start stopwatch
     signalGeneratorLEDOn();
     // Turn on speaker
@@ -82,7 +82,7 @@ void loop() {
       signalGeneratorSpeakerOn();
     }
   }
-  if (timer1CheckCompFlag()){
+  if (timer1CheckFlag(COMP)){
     // Turn off LED
     signalGeneratorLEDOff();
     // Turn off speaker
