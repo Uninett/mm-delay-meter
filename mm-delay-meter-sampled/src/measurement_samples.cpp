@@ -17,7 +17,7 @@ int idle_mic_val;
 
 int16_t samples[NUM_SAMPLES];
 
-void measurementSamplesSetup()
+void measurementSamplesSetup(int mode)
 {
 	// Initialize measurement series
 	measured_delay_flag = 0;
@@ -33,7 +33,43 @@ void measurementSamplesSetup()
     pauseTimer3();
     timer3ClearSamplingFlag();
 
-    /* ADC speed */ 
+    // Calibrate microphone measurements
+	if(mode == SOUND_MODE){
+		Serial.println("Calibrating microphone...");
+		int current_mic = analogRead(microphonePin);
+		int prev_mic = current_mic;
+		int mean = 0;
+		int mic[10] = {0};
+		int idle_iterations = 0;
+		while (idle_iterations < 10){
+			current_mic = analogRead(microphonePin);
+			if (abs(current_mic - prev_mic) < 5){
+				Serial.print(idle_iterations);
+				Serial.print("\t");
+				Serial.print(prev_mic);
+				Serial.print("\t");
+				Serial.println(current_mic);
+				mic[idle_iterations] = current_mic;
+				idle_iterations++;
+			}
+			else{
+				Serial.println("Reset");
+				mic[10] = {0};
+				idle_iterations = 0;
+			}
+			prev_mic = current_mic;
+		}
+
+		for (auto &m: mic){
+			mean += m;
+		}
+		mean = mean/10;    
+		setIdleMicVal(mean);
+		Serial.print("Mean: ");
+		Serial.println(mean);
+	}
+
+    /* ADC speed - prescaler 16 */ 
     ADCSRA = (ADCSRA & B11111000) | 4; 
 }
 

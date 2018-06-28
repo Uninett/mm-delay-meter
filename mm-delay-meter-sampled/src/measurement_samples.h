@@ -2,7 +2,7 @@
 
 #include <inttypes.h>
 
-void measurementSamplesSetup();
+void measurementSamplesSetup(int mode);
 bool measurementSamplesCheckMeasuredFlag();
 double measurementSamplesGetDelayMs();
 
