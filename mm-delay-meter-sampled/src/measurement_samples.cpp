@@ -104,6 +104,9 @@ bool edge_detected;
 
 void measurementSamplesRisingEdgeDetection(int mode)
 {
+	/*TEST*/
+	digitalWrite(testFreqPin, digitalRead(testFreqPin)^1);
+
 	switch (mode)
 	{
 		case VIDEO_MODE:

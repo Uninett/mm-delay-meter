@@ -9,6 +9,9 @@ volatile bool timer3_sample_flag;
 
 // On 16 MHz Arduino boards, this function has a resolution of 4us
 void startTimer3(void) {
+	/*TEST*/
+	pinMode(testFreqPin, OUTPUT);
+
 	pauseTimer3();
 	TCCR3A = 0;
 	TCCR3C = 0;
