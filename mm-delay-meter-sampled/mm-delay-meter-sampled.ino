@@ -29,7 +29,6 @@ void setup() {
   //interrupts();
   resumeTimer1();
   resumeTimer3();
-  num_measurements = 0;
   
 }
 
@@ -57,7 +56,11 @@ void loop() {
     //measurementSamplesRisingEdgeDetectionSound();
   }
   if (measurementSamplesCheckMeasuredFlag()){
-    SDCardLogger("measurements.txt", num_measurements);
-    num_measurements++;
+    pauseTimer1();
+    pauseTimer3();
+    SDCardLogger("measurements.txt");
+    //SDCardPrintContent();
+    resumeTimer1();
+    resumeTimer3();
   }
 }

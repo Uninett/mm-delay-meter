@@ -138,8 +138,8 @@ int16_t measurementSamplesMaxSmoothingFilter()
 // Rising edge detection
 int16_t current_max;
 int16_t prev_max;
-int16_t prev_prev_max;
 bool edge_detected;
+unsigned long deltaMicrosSaved[BUF_SIZE];
 
 void measurementSamplesRisingEdgeDetection(int mode)
 {
@@ -162,6 +162,7 @@ void measurementSamplesRisingEdgeDetection(int mode)
 void measurementSamplesRisingEdgeDetectionVideo()
 {
 	static int16_t acc_pos_slopes;
+	static uint8_t i_m;
 	// Get timestamp as early as possible
 	delta = readTimer1();
 
@@ -184,10 +185,18 @@ void measurementSamplesRisingEdgeDetectionVideo()
 		}
 		
     	if (edge_detected){
-			deltaMicros = microsFromCounting((unsigned long)delta);
-	    	measured_delay_flag = 1;
+    		deltaMicros = microsFromCounting((unsigned long)delta);
+			deltaMicrosSaved[i_m++] = deltaMicros;
 			light_recieved_at_sensor_flag = 1;
 			acc_pos_slopes = 0;
+
+			if (i_m >= BUF_SIZE){
+				i_m = 0;
+	    		measured_delay_flag = 1; // Save measurements in SD card
+			}
+			Serial.print(i_m);
+			Serial.print("\t");
+			Serial.println(deltaMicrosSaved[i_m-1]);
 		}
 	}
 	prev_max = current_max;
@@ -201,7 +210,8 @@ void setIdleMicVal(int val)
 
 void measurementSamplesRisingEdgeDetectionSound()
 {
-	static int16_t acc_pos_slopes;
+	static int16_t num_pos_measures;
+	static uint8_t i_m;
 	// Get timestamp as early as possible
 	delta = readTimer1();
 
@@ -214,24 +224,27 @@ void measurementSamplesRisingEdgeDetectionSound()
 		}
 		else{
 			if (current_max > idle_mic_val){
-				acc_pos_slopes++;
-				Serial.println(acc_pos_slopes);
+				num_pos_measures++;
+				Serial.println(num_pos_measures);
 			} 
-			else acc_pos_slopes = 0;
-			if (acc_pos_slopes >= 2){
+			else num_pos_measures = 0;
+			if (num_pos_measures >= 2){
 				edge_detected = true;
 			}
 		}
-		//edge_detected = (current_max > idle_mic_val); // Can not do this
-		//if (edge_detected) Serial.println(current_max - idle_mic_val);
-		// Otherwise, compare previous 3 values. Increased >10 and strictly increasing
-		// if(!edge_detected){
-  //     		edge_detected = (current_max - prev_prev_max > 10 && current_max >= prev_max && prev_max >= prev_prev_max); 
-  //   	}
-    	if (edge_detected){
-			deltaMicros = microsFromCounting((unsigned long)delta);
-	    	measured_delay_flag = 1;
+
+    	if (edge_detected){ 
+			deltaMicrosSaved[i_m++] = microsFromCounting((unsigned long)delta);
 			sound_recieved_at_mic_flag = 1;
+			num_pos_measures = 0;
+
+			if (i_m >= BUF_SIZE){
+				i_m = 0;
+	    		measured_delay_flag = 1; // Save measurements in SD card
+			}
+			Serial.print(i_m);
+			Serial.print("\t");
+			Serial.println(deltaMicrosSaved[i_m-1]);
 		}
 	}
 	//num_runs++;
@@ -247,4 +260,9 @@ void measurementSamplesClearLightRecievedFlag()
 void measurementSamplesClearSoundRecievedFlag()
 {
 	sound_recieved_at_mic_flag = 0;
+}
+
+unsigned long measurementSamplesGetSavedSample(uint8_t index)
+{
+	return deltaMicrosSaved[index];
 }

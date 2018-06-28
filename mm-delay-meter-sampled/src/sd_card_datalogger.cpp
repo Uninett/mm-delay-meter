@@ -11,14 +11,14 @@ void SDCardSetup() {
 }
 
 
-void SDCardLogger(String filename, int num) {
+void SDCardLogger(String filename) {
     // open the file. note that only one file can be open at a time,
     // so you have to close this one before opening another.
     File dataFile = FileSystem.open(("/mnt/sd/" + filename).c_str(), FILE_APPEND);
 
-    //Serial.println("SD card logging...");
+    Serial.println("SD card logging...");
     // make a string that start with a timestamp for assembling the data to log:
-    String dataString;
+    String dataString = "";
     // if (num == 0){
     //     Process time;
     //     Serial.println("hm");
@@ -41,26 +41,25 @@ void SDCardLogger(String filename, int num) {
     //     }
     // }
 
-    double delay = measurementSamplesGetDelayMs();
-    dataString = String(num);
-    dataString += "\t";
-    dataString += String(delay);
-
-    
+    static int i_m;
+    double delayMillis;
+    for (uint8_t i = 0; i < BUF_SIZE; i++){
+    	delayMillis =  measurementSamplesGetSavedSample(i)/1000.0;
+    	dataString += String(i_m++);
+    	dataString += "\t";
+    	dataString += String(delayMillis);
+    	dataString += "\n";
+    }
 
     // if the file is available, write to it:
     if (dataFile) {
         dataFile.println(dataString);
         dataFile.close();
-        // print to the serial port too:
-        Serial.println(dataString);
     }
     // if the file isn't open, pop up an error:
     else {
         Serial.println("error opening " + filename);
     }
-
-
 }
 
 void SDCardPrintContent()
