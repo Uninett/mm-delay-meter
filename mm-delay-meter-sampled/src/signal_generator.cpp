@@ -17,24 +17,24 @@ void signalGeneratorSetup(int mode)
 	{
 		case SOUND_MODE:
 			// Speaker setup
-			pinMode(speakerPin, OUTPUT);
+			//pinMode(speakerPin, OUTPUT);
 			pinMode(buzzerPin, OUTPUT);
 
-			// Timer0:
-			TCNT0 = 0;
-			// Toggle OC0A on compare match in CTC mode
-			TCCR0A = B01000010;
-			// Prescaler = 64
-			TCCR0B = B00000011;
-			// Compare match at 16MHz/(ps*f*2), ps = 64, f = 500Hz
-			OCR0A = 250;
-			pauseTimer0();
+			// // Timer0:
+			// TCNT0 = 0;
+			// // Toggle OC0A on compare match in CTC mode
+			// TCCR0A = B01000010;
+			// // Prescaler = 64
+			// TCCR0B = B00000011;
+			// // Compare match at 16MHz/(ps*f*2), ps = 64, f = 500Hz
+			// OCR0A = 250;
+			// pauseTimer0();
 			signalGeneratorSpeakerOff();
 			//break;
 		case VIDEO_MODE:
 			// LED setup
 			pinMode(ledPin, OUTPUT);
-			digitalWrite(ledPin, LOW);
+			signalGeneratorLEDOff();
 			break;
 	}
 }

@@ -26,11 +26,9 @@ void startTimer3(void) {
 	TIFR3 = 0;
 	// Enable compare match 3A interrupt
 	TIMSK3 = B00000010;
-	// Match at TCNT3 = 50: 200us
-	// 12kHz: 8,3333*10^-5 s = 0,00008333s = 83.33 us
-	// 80 us = 0,00008: 12,5kHz
-	//OCR3A = 50;
-	OCR3A = 8; 
+	// Match at TCNT3 = 8: 32us
+	// Sampling frequency: 1/0.000032s = 31 250 Hz
+	OCR3A = 10; 
 	resumeTimer3();
 }
 uint16_t readTimer3(void) {
@@ -64,10 +62,7 @@ void resetTimer3(void) {
 
 ISR(TIMER3_COMPA_vect)
 {
-	// Sample using flag?
 	timer3_sample_flag = 1;
-
-	
 }
 
 bool timer3CheckSamplingFlag()

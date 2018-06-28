@@ -8,7 +8,7 @@
 
 #define MAX_NUM_MEASUREMENTS  20
 int num_measurements;
-const int mode = SOUND_MODE;
+const int mode = VIDEO_MODE;
 
 void setup() {
   
@@ -20,13 +20,13 @@ void setup() {
   Serial.println("Bridge...");
   Bridge.begin();
   Serial.println("Bridge setup complete");
+  delay(3000);
+  digitalWrite(LED_BUILTIN, HIGH);
 
-  //noInterrupts();
   SDCardSetup();
   signalGeneratorSetup(mode);
   measurementSamplesSetup(mode);
 
-  //interrupts();
   resumeTimer1();
   resumeTimer3();
   
@@ -50,10 +50,7 @@ void loop() {
     }
   }
   if (timer3CheckSamplingFlag()){
-    // Measure light
     measurementSamplesRisingEdgeDetection(mode);
-    // Measure sound
-    //measurementSamplesRisingEdgeDetectionSound();
   }
   if (measurementSamplesCheckMeasuredFlag()){
     pauseTimer1();

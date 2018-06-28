@@ -11,8 +11,8 @@ double measurementSamplesGetDelayMs();
 void measurementSamplesInitialize();
 int16_t measurementSamplesMaxSmoothingFilter();
 void measurementSamplesRisingEdgeDetection(int mode);
-void measurementSamplesRisingEdgeDetectionVideo();
-void measurementSamplesRisingEdgeDetectionSound();
+bool measurementSamplesRisingEdgeDetectionVideo();
+bool measurementSamplesRisingEdgeDetectionSound();
 
 void measurementSamplesClearLightRecievedFlag();
 void measurementSamplesClearSoundRecievedFlag();
