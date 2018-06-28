@@ -32,6 +32,9 @@ void measurementSamplesSetup()
     startTimer3();
     pauseTimer3();
     timer3ClearSamplingFlag();
+
+    /* ADC speed */ 
+    ADCSRA = (ADCSRA & B11111000) | 4; 
 }
 
 bool measurementSamplesCheckMeasuredFlag()
@@ -105,7 +108,9 @@ bool edge_detected;
 void measurementSamplesRisingEdgeDetection(int mode)
 {
 	/*TEST*/
-	digitalWrite(testFreqPin, digitalRead(testFreqPin)^1);
+	//digitalWrite(testFreqPin, digitalRead(testFreqPin)^1);
+	//Writing a logic one to PINxn toggles the value of PORTxn, digital pin 6 is PD7
+	PIND = 0x80;
 
 	switch (mode)
 	{

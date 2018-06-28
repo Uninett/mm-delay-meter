@@ -30,7 +30,7 @@ void startTimer3(void) {
 	// 12kHz: 8,3333*10^-5 s = 0,00008333s = 83.33 us
 	// 80 us = 0,00008: 12,5kHz
 	//OCR3A = 50;
-	OCR3A = 10;  // The measurement cycle takes approx 35us. Sampling should be less frequent
+	OCR3A = 8; 
 	resumeTimer3();
 }
 uint16_t readTimer3(void) {
