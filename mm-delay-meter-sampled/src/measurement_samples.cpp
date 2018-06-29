@@ -27,7 +27,7 @@ void measurementSamplesSetup(int mode)
     measurementSamplesInitialize();
 
     // Initialize sampling interval
-    startTimer3();
+    startTimer3(mode);
     pauseTimer3();
     timer3ClearSamplingFlag();
 
@@ -157,7 +157,7 @@ void measurementSamplesRisingEdgeDetection(int mode)
 		deltaMicrosSaved[i_m++] = microsFromCounting((unsigned long)delta);
 		if (mode == VIDEO_MODE) light_recieved_at_sensor_flag = 1;
 		if (mode == SOUND_MODE) sound_recieved_at_mic_flag = 1;
-		
+
 		Serial.print(i_m);
 		Serial.print("\t");
 		Serial.println(deltaMicrosSaved[i_m-1]);
@@ -204,7 +204,7 @@ bool measurementSamplesRisingEdgeDetectionSound()
 		else{
 			if (current_max > idle_mic_val){
 				num_pos_measures++;
-				Serial.println(num_pos_measures);
+				//Serial.println(num_pos_measures);
 			} 
 			else num_pos_measures = 0;
 			if (num_pos_measures >= 2) edge_detected = true; 

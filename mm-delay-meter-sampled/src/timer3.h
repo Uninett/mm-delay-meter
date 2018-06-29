@@ -8,7 +8,7 @@ extern uint16_t __timer3CounterValue;
 #define resetTimer3Unsafe() TCNT3 = __timer3CounterValue
 #define pauseTimer3() TCCR3B = 0
 #define resumeTimer3() TCCR3B = __timer3Control
-extern void startTimer3(void);
+extern void startTimer3(int mode);
 extern uint16_t readTimer3(void);
 extern void resetTimer3(void);
 

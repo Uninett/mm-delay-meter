@@ -8,7 +8,7 @@ uint16_t __timer3CounterValue;
 volatile bool timer3_sample_flag;
 
 // On 16 MHz Arduino boards, this function has a resolution of 4us
-void startTimer3(void) {
+void startTimer3(int mode) {
 	/*TEST*/
 	pinMode(testFreqPin, OUTPUT);
 
@@ -28,7 +28,8 @@ void startTimer3(void) {
 	TIMSK3 = B00000010;
 	// Match at TCNT3 = 8: 32us
 	// Sampling frequency: 1/0.000032s = 31 250 Hz
-	OCR3A = 10; 
+	if (mode == SOUND_MODE)	OCR3A = 7; 
+	if (mode == VIDEO_MODE) OCR3A = 10;
 	resumeTimer3();
 }
 uint16_t readTimer3(void) {
