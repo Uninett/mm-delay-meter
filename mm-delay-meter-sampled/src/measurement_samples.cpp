@@ -33,6 +33,17 @@ void measurementSamplesSetup(int mode)
 
     // Calibrate microphone measurements
 	if(mode == SOUND_MODE){
+		/* Change ADC's Vref to internal 2.56V */
+		Serial.println("ADC setup");
+		analogReference(INTERNAL);
+		int dummyRead;
+		for (int i = 0; i < 100; i++){
+			dummyRead = analogRead(A1);
+			Serial.println(dummyRead);
+		}
+		Serial.println("ADC setup commplete");
+
+
 		Serial.println("Calibrating microphone...");
 		int current_mic = analogRead(microphonePin);
 		int prev_mic = current_mic;
@@ -202,9 +213,9 @@ bool measurementSamplesRisingEdgeDetectionSound()
 	if (!sound_recieved_at_mic_flag){
 		if (current_max - idle_mic_val > 5) edge_detected = true; 
 		else{
-			if (current_max > idle_mic_val){
+			if (current_max > idle_mic_val+1){
 				num_pos_measures++;
-				//Serial.println(num_pos_measures);
+				Serial.println(num_pos_measures);
 			} 
 			else num_pos_measures = 0;
 			if (num_pos_measures >= 2) edge_detected = true; 
