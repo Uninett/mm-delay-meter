@@ -8,7 +8,7 @@
 
 #define MAX_NUM_MEASUREMENTS  20
 int num_measurements;
-const int mode = VIDEO_MODE;
+const int mode = SOUND_MODE;
 
 void setup() {
   
@@ -55,8 +55,13 @@ void loop() {
   if (measurementSamplesCheckMeasuredFlag()){
     pauseTimer1();
     pauseTimer3();
+    signalGeneratorLEDOff();
+    // Turn off speaker
+    if (mode == SOUND_MODE){
+      signalGeneratorSpeakerOff();
+    }
     SDCardLogger("measurements.txt");
-    //SDCardPrintContent();
+    SDCardPrintContent();
     resumeTimer1();
     resumeTimer3();
   }
