@@ -1,6 +1,6 @@
 #pragma once
 
 void SDCardSetup();
-void SDCardLogger(String filename);
 String SDCardGenerateNewFile();
+String SDCardLogger(String start_time, String date);
 void SDCardPrintContent();

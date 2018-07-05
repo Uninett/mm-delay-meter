@@ -9,6 +9,8 @@
 #define MAX_NUM_MEASUREMENTS  20
 int num_measurements;
 const int mode = SOUND_MODE;
+String date;
+String start_time;
 
 void setup() {
   
@@ -60,8 +62,9 @@ void loop() {
     if (mode == SOUND_MODE){
       signalGeneratorSpeakerOff();
     }
-    SDCardLogger("measurements.txt");
-    SDCardPrintContent();
+    String file = SDCardLogger(start_time, date);
+    while(true);    // TEMPORARY: Stop when a measurement series is complete
+    //SDCardPrintContent();
     resumeTimer1();
     resumeTimer3();
   }
