@@ -2,7 +2,7 @@
 
 #include <inttypes.h>
 
-#define BUF_SIZE		10
+#define BUF_SIZE		5
 
 void measurementSamplesSetup(int mode);
 bool measurementSamplesCheckMeasuredFlag();
@@ -10,7 +10,7 @@ double measurementSamplesGetDelayMs();
 
 void measurementSamplesInitialize();
 int16_t measurementSamplesMaxSmoothingFilter();
-void measurementSamplesRisingEdgeDetection(int mode);
+bool measurementSamplesRisingEdgeDetection(int mode);
 bool measurementSamplesRisingEdgeDetectionVideo();
 bool measurementSamplesRisingEdgeDetectionSound();
 

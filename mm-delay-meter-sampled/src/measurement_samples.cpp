@@ -13,6 +13,7 @@ bool measured_delay_flag;
 unsigned short delta;
 unsigned long deltaMicros;
 int idle_mic_val;
+bool first_edge_detected;
 
 int16_t samples[NUM_SAMPLES];
 
@@ -22,6 +23,7 @@ void measurementSamplesSetup(int mode)
 	measured_delay_flag = 0;
 	light_recieved_at_sensor_flag = 0;
 	sound_recieved_at_mic_flag = 0;
+	first_edge_detected = false;
     pinMode(lightSensorPin, INPUT);
     pinMode(microphonePin, INPUT);
     measurementSamplesInitialize();
@@ -143,7 +145,8 @@ int16_t prev_max;
 bool edge_detected;
 unsigned long deltaMicrosSaved[BUF_SIZE];
 
-void measurementSamplesRisingEdgeDetection(int mode)
+
+bool measurementSamplesRisingEdgeDetection(int mode)
 {
 	static uint8_t i_m;
 	// Get timestamp as early as possible
@@ -176,7 +179,12 @@ void measurementSamplesRisingEdgeDetection(int mode)
 			i_m = 0;
     		measured_delay_flag = 1; // Save measurements in SD card
 		}
+		if (!first_edge_detected){
+			// Tell rest of program that the first successful measurements have started
+			first_edge_detected = true;
+		}
 	}
+	return first_edge_detected;
 }
 
 bool measurementSamplesRisingEdgeDetectionVideo()
