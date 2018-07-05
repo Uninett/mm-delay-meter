@@ -81,6 +81,22 @@ void loop() {
       signalGeneratorSpeakerOff();
     }
     String file = SDCardLogger(start_time, date);
+    // Upload to database
+    p.runShellCommand("curl --data \"nokkel=A8:40:41:19:74:90\" --data-urlencode seriedata@" + file + " http://delay.uninett.no/fmaling/dbm.php");
+    while(p.running());
+    String data = "";
+    int i = 0;
+    while(p.available() > 0){
+      char c = p.read();
+      data += c;
+      if (i > 0 && c != "[" && c != "]"){
+        // Successful upload
+        p.runShellCommand("rm " + file);
+        break;
+      }
+      i++;
+    }
+    Serial.println(data);
     while(true);    // TEMPORARY: Stop when a measurement series is complete
     //SDCardPrintContent();
     resumeTimer1();
