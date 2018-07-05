@@ -1,13 +1,30 @@
 /* SD card datalogger */
 
 #include <FileIO.h>
+#include <Process.h>
 #include "sd_card_datalogger.h"
 #include "measurement_samples.h"
+
+// delete files: rm -rf /mnt/sda1/arduino/delay/*
 
 void SDCardSetup() {
     // Initialize the Bridge and the Serial
     FileSystem.begin();
-    FileSystem.remove("/mnt/sd/measurements.txt");
+}
+
+String SDCardGenerateNewFile()
+{	
+	// Create new file with unique name in /mnt/sda1/arduino/delay directory
+	Process f;
+	String name = "";
+	f.runShellCommand("echo $(mktemp -t -p /mnt/sd/arduino/delay)");
+	while (f.running());
+	while (f.available() > 0){
+		char c = f.read();
+		name += c;
+	}
+	name.trim();
+	return name;
 }
 
 
