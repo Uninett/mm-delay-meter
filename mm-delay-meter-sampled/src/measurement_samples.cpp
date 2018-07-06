@@ -13,6 +13,7 @@ bool measured_delay_flag;
 unsigned short delta;
 unsigned long deltaMicros;
 int idle_mic_val;
+int idle_ltv_val;
 bool first_edge_detected;
 
 int16_t samples[NUM_SAMPLES];
@@ -26,6 +27,40 @@ void measurementSamplesSetup(int mode)
 	first_edge_detected = false;
     pinMode(lightSensorPin, INPUT);
     pinMode(microphonePin, INPUT);
+    if (mode == VIDEO_MODE){
+    	Serial.println("Calibrating light-to-voltage sensor...");
+		int current_ltv = analogRead(lightSensorPin);
+		int prev_ltv = current_ltv;
+		int mean = 0;
+		int ltv[10] = {0};
+		int idle_iterations = 0;
+		while (idle_iterations < 10){
+			current_ltv = analogRead(lightSensorPin);
+			if (abs(current_ltv - prev_ltv) < 5){
+				Serial.print(idle_iterations);
+				Serial.print("\t");
+				Serial.print(prev_ltv);
+				Serial.print("\t");
+				Serial.println(current_ltv);
+				ltv[idle_iterations] = current_ltv;
+				idle_iterations++;
+			}
+			else{
+				Serial.println("Reset");
+				ltv[10] = {0};
+				idle_iterations = 0;
+			}
+			prev_ltv = current_ltv;
+		}
+
+		for (auto &v: ltv){
+			mean += v;
+		}
+		mean = mean/10;    
+		idle_ltv_val = mean;
+		Serial.print("Mean l-t-v: ");
+		Serial.println(mean);
+    }
     measurementSamplesInitialize();
 
     // Initialize sampling interval
@@ -103,7 +138,9 @@ uint8_t max_sample_index;
 
 void measurementSamplesInitialize()
 {
-	samples[NUM_SAMPLES] = {0};
+	for (int i = 0; i < NUM_SAMPLES; i++){
+		samples[i] = idle_ltv_val;
+	}
 	current_index = 0;
 	max_sample = 0;
 	max_sample_index = 0;
@@ -141,7 +178,6 @@ int16_t measurementSamplesMaxSmoothingFilter()
 
 // Rising edge detection
 int16_t current_max;
-int16_t prev_max;
 bool edge_detected;
 unsigned long deltaMicrosSaved[BUF_SIZE];
 
@@ -192,6 +228,7 @@ bool measurementSamplesRisingEdgeDetectionVideo()
 	static int16_t acc_pos_slopes;
 
 	current_max = measurementSamplesMaxSmoothingFilter();
+	static int16_t prev_max = current_max;
 	edge_detected = false;
 
 	if (!light_recieved_at_sensor_flag){
