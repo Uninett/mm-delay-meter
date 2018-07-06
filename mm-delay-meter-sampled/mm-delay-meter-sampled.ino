@@ -82,7 +82,9 @@ void loop() {
     }
     String file = SDCardLogger(start_time, date);
     // Upload to database
-    p.runShellCommand("curl --data \"nokkel=A8:40:41:19:74:90\" --data-urlencode seriedata@" + file + " http://delay.uninett.no/fmaling/dbm.php");
+    String mac;
+    getMACAddress(mac, p);
+    p.runShellCommand("curl --data \"nokkel=" + mac + "\" --data-urlencode seriedata@" + file + " http://delay.uninett.no/fmaling/dbm.php");
     while(p.running());
     String data = "";
     int i = 0;
@@ -91,8 +93,8 @@ void loop() {
       data += c;
       if (i > 0 && c != "[" && c != "]"){
         // Successful upload
-        p.runShellCommand("rm " + file);
-        break;
+        //p.runShellCommand("rm " + file);
+        //break;
       }
       i++;
     }
@@ -101,5 +103,14 @@ void loop() {
     //SDCardPrintContent();
     resumeTimer1();
     resumeTimer3();
+  }
+}
+
+void getMACAddress(String &mac, Process get_mac){
+  mac = "";
+  get_mac.runShellCommand(F("ifconfig wlan0 | awk '/HWaddr/ {print $NF}'"));
+  while (get_mac.available() > 0){
+    char c = get_mac.read();
+    mac += c;
   }
 }
