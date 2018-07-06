@@ -12,11 +12,10 @@ void SDCardSetup() {
     FileSystem.begin();
 }
 
-String SDCardGenerateNewFile()
+void SDCardGenerateNewFile(String &name)
 {	
 	// Create new file with unique name in /mnt/sda1/arduino/delay directory
 	Process f;
-	String name = "";
 	f.runShellCommand("echo $(mktemp -t -p /mnt/sd/arduino/delay)");
 	while (f.running());
 	while (f.available() > 0){
@@ -24,14 +23,14 @@ String SDCardGenerateNewFile()
 		name += c;
 	}
 	name.trim();
-	return name;
 }
 
 
 String SDCardLogger(String start_time, String date) {
     // open the file. note that only one file can be open at a time,
     // so you have to close this one before opening another.
-    String filename = SDCardGenerateNewFile();
+    String filename = "";
+    SDCardGenerateNewFile(filename);
     Serial.print("File name: ");
     Serial.println(filename);
     File dataFile = FileSystem.open(filename.c_str(), FILE_APPEND);
@@ -40,8 +39,9 @@ String SDCardLogger(String start_time, String date) {
     String dataString = "";
     static int i_m;
     double delayMillis;
-    static int hour; String s_hour = "";
-    static int minute; String s_minute = "";
+    String time_string = "";
+    static int hour; 
+    static int minute;
     Process time;
 
     // Calculate timestamps
@@ -50,15 +50,16 @@ String SDCardLogger(String start_time, String date) {
     	time.runShellCommand("echo \"" + start_time + "\" | cut -d \":\" -f 1");
     	while (time.available() > 0){
     		char c = time.read();
-    		s_hour += c;
+    		time_string += c;
     	}
-    	hour = s_hour.toInt();
+    	hour = time_string.toInt();
+    	time_string = "";
     	time.runShellCommand("echo \"" + start_time + "\" | cut -d \":\" -f 2");
     	while (time.available() > 0){
     		char c = time.read();
-    		s_minute += c;
+    		time_string += c;
     	}
-    	minute = s_minute.toInt();
+    	minute = time_string.toInt();
     }
 
     if (i_m > 30){
