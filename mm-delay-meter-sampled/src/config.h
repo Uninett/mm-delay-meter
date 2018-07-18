@@ -1,7 +1,10 @@
 #pragma once
 
 //#define speakerPin  				11	// OC0A
+#define modeSelectPin				7	// INT6
 #define buzzerPin					8
+#define videoModeIndicator			10
+#define soundModeIndicator			11
 #define ledPin  					12
 #define lightSensorPin				A0
 #define microphonePin				A1

@@ -8,7 +8,8 @@
 
 #define MAX_NUM_MEASUREMENTS  20
 int num_measurements;
-const int mode = VIDEO_MODE;
+int mode = VIDEO_MODE;
+bool mode_change_flag = false;
 bool started_measurements = false;
 String date;
 String start_time;
@@ -27,6 +28,17 @@ void setup() {
   delay(3000);
   digitalWrite(LED_BUILTIN, HIGH);
 
+  /* SETUP */
+  pinMode(videoModeIndicator, OUTPUT);
+  pinMode(soundModeIndicator, OUTPUT);
+  pinMode(modeSelectPin, INPUT);
+  digitalWrite(videoModeIndicator, HIGH);
+  digitalWrite(soundModeIndicator, LOW);
+  // Configure external interrupt INT6, rising edge
+  EICRB |= (1 << ISC61) | (1 << ISC60);
+  EIMSK |= (1 << INT6);
+  interrupts();
+
   SDCardSetup();
   signalGeneratorSetup(mode);
   measurementSamplesSetup(mode);
@@ -38,6 +50,18 @@ void setup() {
 }
 
 void loop() {
+  if (mode_change_flag){
+    mode_change_flag = false;
+    pauseTimer1();
+    resetTimer1();
+    pauseTimer3();
+    signalGeneratorSpeakerOff();
+    signalGeneratorLEDOff();
+    measurementSamplesSetup(mode);
+    resumeTimer1();
+    resumeTimer3();
+  }
+  
   if (timer1CheckFlag(OVF)){
     signalGeneratorLEDOn();
     if (mode == SOUND_MODE){
@@ -114,3 +138,23 @@ void getMACAddress(String &mac, Process get_mac){
     mac += c;
   }
 }
+
+ISR(INT6_vect)
+{
+  mode_change_flag = true;
+  if (mode == VIDEO_MODE){
+    mode = SOUND_MODE;
+    // Turn off video led
+    digitalWrite(videoModeIndicator, LOW);
+    // Turn on sound led
+    digitalWrite(soundModeIndicator, HIGH);
+  }
+  else{
+    mode = VIDEO_MODE;
+    // Turn off sound led
+    digitalWrite(soundModeIndicator, LOW);
+    // Turn on video led
+    digitalWrite(videoModeIndicator, HIGH);
+  }
+}
+

@@ -8,7 +8,7 @@ void measurementSamplesSetup(int mode);
 bool measurementSamplesCheckMeasuredFlag();
 double measurementSamplesGetDelayMs();
 
-void measurementSamplesInitialize();
+void measurementSamplesInitialize(int mode);
 int16_t measurementSamplesMaxSmoothingFilter();
 bool measurementSamplesRisingEdgeDetection(int mode);
 bool measurementSamplesRisingEdgeDetectionVideo();

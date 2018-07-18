@@ -13,12 +13,17 @@ void signalGeneratorSetup(int mode)
 	startTimer1();
 	pauseTimer1();
 
+	pinMode(buzzerPin, OUTPUT);
+	signalGeneratorSpeakerOff();
+	pinMode(ledPin, OUTPUT);
+	signalGeneratorLEDOff();
+
 	switch (mode)
 	{
 		case SOUND_MODE:
 			// Speaker setup
 			//pinMode(speakerPin, OUTPUT);
-			pinMode(buzzerPin, OUTPUT);
+			//pinMode(buzzerPin, OUTPUT);
 
 			// // Timer0:
 			// TCNT0 = 0;
@@ -29,12 +34,12 @@ void signalGeneratorSetup(int mode)
 			// // Compare match at 16MHz/(ps*f*2), ps = 64, f = 500Hz
 			// OCR0A = 250;
 			// pauseTimer0();
-			signalGeneratorSpeakerOff();
+			//signalGeneratorSpeakerOff();
 			//break;
 		case VIDEO_MODE:
 			// LED setup
-			pinMode(ledPin, OUTPUT);
-			signalGeneratorLEDOff();
+			// pinMode(ledPin, OUTPUT);
+			// signalGeneratorLEDOff();
 			break;
 	}
 }

@@ -61,7 +61,6 @@ void measurementSamplesSetup(int mode)
 		Serial.print("Mean l-t-v: ");
 		Serial.println(mean);
     }
-    measurementSamplesInitialize();
 
     // Initialize sampling interval
     startTimer3(mode);
@@ -114,6 +113,7 @@ void measurementSamplesSetup(int mode)
 		Serial.print("Mean: ");
 		Serial.println(mean);
 	}
+    measurementSamplesInitialize(mode);
 
     /* ADC speed - prescaler 16 */ 
     ADCSRA = (ADCSRA & B11111000) | 4; 
@@ -136,10 +136,10 @@ uint8_t current_index;
 uint16_t max_sample;
 uint8_t max_sample_index;
 
-void measurementSamplesInitialize()
+void measurementSamplesInitialize(int mode)
 {
 	for (int i = 0; i < NUM_SAMPLES; i++){
-		samples[i] = idle_ltv_val;
+		samples[i] = (mode == VIDEO_MODE) ? idle_ltv_val : idle_mic_val;
 	}
 	current_index = 0;
 	max_sample = 0;
