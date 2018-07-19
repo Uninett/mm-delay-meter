@@ -191,7 +191,7 @@ bool measurementSamplesRisingEdgeDetection(int mode)
 	/*TEST*/
 	//digitalWrite(testFreqPin, digitalRead(testFreqPin)^1);
 	//Writing a logic one to PINxn toggles the value of PORTxn, digital pin 6 is PD7
-	PIND = 0x80;
+	//PIND = 0x80;
 
 	switch (mode)
 	{
@@ -215,12 +215,15 @@ bool measurementSamplesRisingEdgeDetection(int mode)
 			i_m = 0;
     		measured_delay_flag = 1; // Save measurements in SD card
 		}
-		if (!first_edge_detected){
-			// Tell rest of program that the first successful measurements have started
-			first_edge_detected = true;
+		else if (i_m == 1){
+			return true; // First edge detected
 		}
+		// if (!first_edge_detected){
+		// 	// Tell rest of program that the first successful measurements have started
+		// 	first_edge_detected = true;
+		// }
 	}
-	return first_edge_detected;
+	return false;
 }
 
 bool measurementSamplesRisingEdgeDetectionVideo()

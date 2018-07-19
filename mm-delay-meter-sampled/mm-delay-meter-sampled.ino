@@ -6,11 +6,10 @@
 #include "src/sd_card_datalogger.h"
 #include <Process.h>
 
-#define MAX_NUM_MEASUREMENTS  20
-int num_measurements;
 int mode = VIDEO_MODE;
 bool mode_change_flag = false;
 bool started_measurements = false;
+bool running = false;
 String date;
 String start_time;
 Process p;
@@ -29,22 +28,28 @@ void setup() {
   digitalWrite(LED_BUILTIN, HIGH);
 
   /* SETUP */
+  pinMode(startIndicator, OUTPUT);
   pinMode(videoModeIndicator, OUTPUT);
   pinMode(soundModeIndicator, OUTPUT);
   pinMode(modeSelectPin, INPUT);
+  pinMode(startPin, INPUT);
+  digitalWrite(startIndicator, LOW);
   digitalWrite(videoModeIndicator, HIGH);
   digitalWrite(soundModeIndicator, LOW);
   // Configure external interrupt INT6, rising edge
   EICRB |= (1 << ISC61) | (1 << ISC60);
   EIMSK |= (1 << INT6);
+  // Configure external interrupt INT0, rising edge
+  EICRA |= (1 << ISC01) | (1 << ISC00);
+  EIMSK |= (1 << INT0);
   interrupts();
 
   SDCardSetup();
   signalGeneratorSetup(mode);
   measurementSamplesSetup(mode);
 
-  resumeTimer1();
-  resumeTimer3();
+  //resumeTimer1();
+  //resumeTimer3();
   //ADD: blink when ready (after 20-30 sec?)
   
 }
@@ -53,13 +58,14 @@ void loop() {
   if (mode_change_flag){
     mode_change_flag = false;
     pauseTimer1();
-    resetTimer1();
     pauseTimer3();
     signalGeneratorSpeakerOff();
     signalGeneratorLEDOff();
     measurementSamplesSetup(mode);
-    resumeTimer1();
-    resumeTimer3();
+    //resumeTimer1();
+    //resumeTimer3();
+    running = false;
+    digitalWrite(startIndicator, LOW);
   }
   
   if (timer1CheckFlag(OVF)){
@@ -76,7 +82,7 @@ void loop() {
   }
   if (timer3CheckSamplingFlag()){
     bool first_edge = measurementSamplesRisingEdgeDetection(mode);
-    if (!started_measurements && first_edge){
+    if (first_edge){
       // Get start time
       p.begin("date");
       p.addParameter("+%F");
@@ -94,7 +100,6 @@ void loop() {
         char c = p.read();
         start_time += c;
       }
-      started_measurements = true;
     }
   }
   if (measurementSamplesCheckMeasuredFlag()){
@@ -105,7 +110,7 @@ void loop() {
       signalGeneratorSpeakerOff();
     }
     String file = SDCardLogger(start_time, date);
-    // Upload to database
+    // Upload to database, assume wifi
     String mac;
     getMACAddress(mac, p);
     p.runShellCommand("curl --data \"nokkel=" + mac + "\" --data-urlencode seriedata@" + file + " http://delay.uninett.no/fmaling/dbm.php");
@@ -123,10 +128,12 @@ void loop() {
       i++;
     }
     Serial.println(data);
-    while(true);    // TEMPORARY: Stop when a measurement series is complete
+    running = false;
+    digitalWrite(startIndicator, LOW);
+    //while(true);    // TEMPORARY: Stop when a measurement series is complete
     //SDCardPrintContent();
-    resumeTimer1();
-    resumeTimer3();
+    //resumeTimer1();
+    //resumeTimer3();
   }
 }
 
@@ -155,6 +162,27 @@ ISR(INT6_vect)
     digitalWrite(soundModeIndicator, LOW);
     // Turn on video led
     digitalWrite(videoModeIndicator, HIGH);
+  }
+}
+
+ISR(INT0_vect)
+{
+  // Begin/stop measurement series
+  if (!running){
+    running = true;
+    resetTimer3();
+    resetTimer1();
+    resumeTimer3();
+    resumeTimer1();
+    digitalWrite(startIndicator, HIGH);
+  }
+  else if (running){
+    running = false;
+    pauseTimer3();
+    pauseTimer1();
+    signalGeneratorLEDOff();
+    signalGeneratorSpeakerOff();
+    digitalWrite(startIndicator, LOW);
   }
 }
 
