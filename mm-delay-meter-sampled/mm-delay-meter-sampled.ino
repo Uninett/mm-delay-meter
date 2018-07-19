@@ -4,6 +4,7 @@
 #include "src/signal_generator.h"
 #include "src/measurement_samples.h"
 #include "src/sd_card_datalogger.h"
+#include "src/wifi.h"
 #include <Process.h>
 
 int mode = VIDEO_MODE;
