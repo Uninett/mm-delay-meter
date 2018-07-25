@@ -1,6 +1,7 @@
 #pragma once
 
 #include <inttypes.h>
+#include "Arduino.h"
 
 #define BUF_SIZE		5
 
@@ -18,4 +19,4 @@ void measurementSamplesClearLightRecievedFlag();
 void measurementSamplesClearSoundRecievedFlag();
 
 void setIdleMicVal(int val);
-unsigned long measurementSamplesGetSavedSample(uint8_t index);
+String measurementSamplesGetSavedSample(uint8_t index);

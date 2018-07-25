@@ -36,57 +36,60 @@ String SDCardLogger(String start_time, String date) {
     File dataFile = FileSystem.open(filename.c_str(), FILE_APPEND);
 
     Serial.println("SD card logging...");
-    String dataString = "";
-    static int i_m;
-    double delayMillis;
+    String data_string = "";
+    String delayMillis;
     String time_string = "";
-    static int hour; 
-    static int minute;
+    int hour = 0; 
+    int minute = 0;
     Process time;
 
-    // Calculate timestamps
-    if (i_m == 0){
-    	// Get first timestamp (assume minute accuracy) H:M
-    	time.runShellCommand("echo \"" + start_time + "\" | cut -d \":\" -f 1");
-    	while (time.available() > 0){
-    		char c = time.read();
-    		time_string += c;
-    	}
-    	hour = time_string.toInt();
-    	time_string = "";
-    	time.runShellCommand("echo \"" + start_time + "\" | cut -d \":\" -f 2");
-    	while (time.available() > 0){
-    		char c = time.read();
-    		time_string += c;
-    	}
-    	minute = time_string.toInt();
-    }
+	// Get first timestamp (assume minute accuracy) H:M
+	time.runShellCommand("echo \"" + start_time + "\" | cut -d \":\" -f 1");
+	while (time.available() > 0){
+		char c = time.read();
+		time_string += c;
+	}
+	hour = time_string.toInt();
+	time_string = "";
+	time.runShellCommand("echo \"" + start_time + "\" | cut -d \":\" -f 2");
+	while (time.available() > 0){
+		char c = time.read();
+		time_string += c;
+	}
+	minute = time_string.toInt();
 
-    if (i_m > 30){
-    	// A minute has passed
-    	if (minute < 59){
-    		minute++;
-    	}
-    	else{
-    		hour++;
-    		minute = 0;
-    	}
-    }
+    
     date.trim();
+    time_string = String(hour) + ":" + String(minute);
 
     for (uint8_t i = 0; i < BUF_SIZE; i++){
-    	delayMillis =  measurementSamplesGetSavedSample(i)/1000.0;
-    	dataString += String(i_m++);
-    	dataString += ",";
-    	dataString += date + ",";
-    	dataString += String(hour) + ":" + String(minute) + ",";
-    	dataString += String(delayMillis);
-    	dataString += "\n";
+    	if (i >= 30){
+	    	// A minute has passed
+	    	if (minute < 59){
+	    		minute++;
+	    	}
+	    	else{
+	    		hour++;
+	    		minute = 0;
+	    	}
+    	}
+
+    	delayMillis =  measurementSamplesGetSavedSample(i);
+    	data_string += String(i);
+    	data_string += ",";
+    	data_string += date;
+    	data_string += ",";
+    	data_string += time_string;
+    	data_string += ",";
+    	data_string += delayMillis;
+    	data_string += "\n";
+    	Serial.println("Date: " + date + "\tTime: " + time_string);
     }
 
     // if the file is available, write to it:
     if (dataFile) {
-        dataFile.println(dataString);
+    	Serial.println(data_string);
+        dataFile.println(data_string);
         dataFile.close();
     }
     // if the file isn't open, pop up an error:
@@ -94,41 +97,4 @@ String SDCardLogger(String start_time, String date) {
         Serial.println("error opening " + filename);
     }
     return filename;
-}
-
-void SDCardPrintContent()
-{
-    bool donereading = false;
-
-    String dataString;
-    char c;
-    String s;
-
-    //open the file for reading:
-    File myFile = FileSystem.open("/mnt/sda1/measurements.txt", FILE_READ);
-    Serial.println("SD card contents:");
-
-    if (myFile && !donereading) {
-
-    // read from the file until there's nothing else in it:
-        while (myFile.available()) {
-
-            c = myFile.read();
-            s = s + String(c);
-              
-        }
-        Serial.println(s);
-        s = "";
-        donereading = true;
-    }  
-
-    if (donereading){
-        myFile.close();
-        Serial.println("END OF THE FILE");
-        delay(10000);
-    }
-    else {
-        // if the file didn't open, print an error:
-        Serial.println("error opening measurements.txt for reading");
-    }
 }

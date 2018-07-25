@@ -294,7 +294,9 @@ void measurementSamplesClearSoundRecievedFlag()
 	sound_recieved_at_mic_flag = 0;
 }
 
-unsigned long measurementSamplesGetSavedSample(uint8_t index)
+String measurementSamplesGetSavedSample(uint8_t index)
 {
-	return deltaMicrosSaved[index];
+	String sample;
+	sample = String(deltaMicrosSaved[index]/1000.0);
+	return sample;
 }
