@@ -13,6 +13,10 @@ bool started_measurements = false;
 bool running = false;
 String date;
 String start_time;
+String networkId = "UNINETT_guest";
+int wifi_attempts = 0;
+String filenames[10];
+int filenr = 0;
 Process p;
 
 void setup() {
@@ -48,6 +52,53 @@ void setup() {
   SDCardSetup();
   signalGeneratorSetup(mode);
   measurementSamplesSetup(mode);
+
+  /* WiFi */
+//  wifiConfig("Arduino", "uninett", networkId, "", "YUNArduinoAP", "NO", "none");
+//  if(!wifiStatus()){
+//    wifiConfig("Arduino", "uninett", networkId, "", "YUNArduinoAP", "NO", "none");
+//    while(!wifiStatus()){
+//      Serial.print(".");
+//      wifi_attempts++;
+//      if (wifi_attempts >= 10){
+//        Serial.print("\nUnable to connect to ");
+//        Serial.print(networkId);
+//        Serial.println(".");
+//        wifi_attempts = 0;
+//        break;
+//      }
+//    }
+//  }
+//  Process wifiCheck;
+//  String resultStr = "";
+//  wifiCheck.runShellCommand(F("/usr/bin/pretty-wifi-info.lua | grep \"IP address\" | cut -f2 -d\":\" | cut -f1 -d\"/\"" ));
+//  while (wifiCheck.running());
+//  while (wifiCheck.available() > 0) {
+//     char c = wifiCheck.read();
+//     resultStr += c;
+//  }
+//  resultStr.trim();
+//  Serial.print("IP: ");
+//  Serial.println(resultStr);
+//  
+//  while (resultStr == ""){
+//    resultStr = "";
+//    wifiCheck.runShellCommand(F("/usr/bin/pretty-wifi-info.lua | grep \"IP address\" | cut -f2 -d\":\" | cut -f1 -d\"/\"" ));
+//    while (wifiCheck.running());
+//    while (wifiCheck.available() > 0) {
+//       char c = wifiCheck.read();
+//       resultStr += c;
+//    }
+//    resultStr.trim();
+//    Serial.print("IP: ");
+//    Serial.println(resultStr);
+//    delay(2000);
+//  }
+  
+  //delay(60000);
+  /* Test shell script */
+  wifiConnect(p);
+
 
   //resumeTimer1();
   //resumeTimer3();
@@ -104,6 +155,7 @@ void loop() {
     }
   }
   if (measurementSamplesCheckMeasuredFlag()){
+    // A full measurement series is complete
     pauseTimer1();
     pauseTimer3();
     signalGeneratorLEDOff();
@@ -111,24 +163,94 @@ void loop() {
       signalGeneratorSpeakerOff();
     }
     String file = SDCardLogger(start_time, date);
-    // Upload to database, assume wifi
-    String mac;
-    getMACAddress(mac, p);
-    p.runShellCommand("curl --data \"nokkel=" + mac + "\" --data-urlencode seriedata@" + file + " http://delay.uninett.no/fmaling/dbm.php");
-    while(p.running());
-    String data = "";
-    int i = 0;
-    while(p.available() > 0){
-      char c = p.read();
-      data += c;
-      if (i > 0 && c != "[" && c != "]"){
-        // Successful upload
-        //p.runShellCommand("rm " + file);
-        //break;
-      }
-      i++;
+    if (filenr < 10){
+      filenames[filenr++] = file;
     }
-    Serial.println(data);
+    
+    /* Check WiFi connection */
+    Serial.println("Measurement series finished.");
+    
+    if (!wifiStatus(p)){
+      /* Not connected. Try again */
+      Serial.println("WiFi not connected. Trying to reconnect...");
+      wifiConnect(p);      
+    }
+    
+    if (wifiStatus(p)){
+      /* Connected. Upload to database */
+      Serial.println("Connected to WiFi. Uploading to database...");
+//      String mac;
+//      getMACAddress(mac, p);
+//      for (int nr = 0; nr < filenr; nr++){
+//        //p.runShellCommand("curl --data \"nokkel=" + mac + "\" --data-urlencode seriedata@" + filenames[nr] + " http://delay.uninett.no/fmaling/dbm.php");
+//        //while(p.running());
+//        String data = "";
+//        int i = 0;
+//        while(p.available() > 0){
+//          char c = p.read();
+//          data += c;
+//          if (i > 0 && c != "[" && c != "]"){
+//            // Successful upload
+//            Serial.println("Uploaded file " + filenames[nr]);
+//            //p.runShellCommand("rm /mnt/sd/arduino/delay/" + filenames[nr]);
+//            break;
+//          }
+//          i++;
+//        }
+//        filenames[nr] = "";
+//        Serial.println(data);
+//      }
+//      filenr = 0; // Assumed all uploads were successful
+      
+    }
+    else{
+      Serial.println("WiFi still not connected. Try again later.");
+    }
+    
+//    if(!wifiStatus()){
+//      wifiConfig("Arduino", "uninett", networkId, "", "YUNArduinoAP", "NO", "none");
+//      while(!wifiStatus()){
+//        Serial.print(".");
+//        wifi_attempts++;
+//    
+//        if (wifi_attempts >= 10){
+//          Serial.print("\nUnable to connect to ");
+//          Serial.print(networkId);
+//          Serial.println(".");
+//          wifi_attempts = 0;
+//          break;
+//        }
+//      }
+//    }
+//    if(wifiStatus()){
+//      String mac;
+//      getMACAddress(mac, p);
+//      for (int nr = 0; nr < filenr; nr++){
+//        //p.runShellCommand("curl --data \"nokkel=" + mac + "\" --data-urlencode seriedata@" + filenames[nr] + " http://delay.uninett.no/fmaling/dbm.php");
+//        //while(p.running());
+//        String data = "";
+//        int i = 0;
+//        while(p.available() > 0){
+//          char c = p.read();
+//          data += c;
+//          if (i > 0 && c != "[" && c != "]"){
+//            // Successful upload
+//            Serial.println("Uploaded file " + filenames[nr]);
+//            //p.runShellCommand("rm /mnt/sd/arduino/delay/" + filenames[nr]);
+//            break;
+//          }
+//          i++;
+//        }
+//        filenames[nr] = "";
+//        Serial.println(data);
+//      }
+//      filenr = 0; // Assumed all uploads were successful
+//    }
+//    else{
+//      // Try to connect
+//      // Repeat?
+//    }
+    
     running = false;
     digitalWrite(startIndicator, LOW);
     //while(true);    // TEMPORARY: Stop when a measurement series is complete
