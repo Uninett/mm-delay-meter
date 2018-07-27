@@ -130,13 +130,13 @@ uint8_t current_index;
 uint16_t max_sample;
 uint8_t max_sample_index;
 
-void measurementSamplesInitialize(int mode)
+void measurementSamplesInitialize(uint8_t mode)
 {
 	for (int i = 0; i < NUM_SAMPLES; i++){
 		samples[i] = (mode == VIDEO_MODE) ? idle_ltv_val : idle_mic_val;
 	}
 	current_index = 0;
-	max_sample = 0;
+	max_sample = (mode == VIDEO_MODE) ? idle_ltv_val : idle_mic_val;
 	max_sample_index = 0;
 }
 
