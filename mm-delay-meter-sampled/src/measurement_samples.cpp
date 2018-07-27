@@ -15,20 +15,41 @@ unsigned long deltaMicros;
 int idle_mic_val;
 int idle_ltv_val;
 bool first_edge_detected;
+uint8_t i_m;
 
 int16_t samples[NUM_SAMPLES];
 
-void measurementSamplesSetup(int mode)
+void measurementSamplesSetup(uint8_t mode)
 {
 	// Initialize measurement series
+	i_m = 0;
 	measured_delay_flag = 0;
 	light_recieved_at_sensor_flag = 0;
 	sound_recieved_at_mic_flag = 0;
-	first_edge_detected = false;
     pinMode(lightSensorPin, INPUT);
     pinMode(microphonePin, INPUT);
-    if (mode == VIDEO_MODE){
-    	Serial.println("Calibrating light-to-voltage sensor...");
+
+    // Initialize sampling interval
+    startTimer3(mode);
+    pauseTimer3();
+    timer3ClearSamplingFlag();
+
+    measurementSamplesSetMode(mode);
+    measurementSamplesInitialize(mode);
+
+    /* ADC speed - prescaler 16 */ 
+    ADCSRA = (ADCSRA & B11111000) | 4; 
+}
+
+void measurementSamplesSetMode(uint8_t mode)
+{
+	// Initialize sampling interval
+    startTimer3(mode);
+    pauseTimer3();
+    timer3ClearSamplingFlag();
+    
+	if (mode == VIDEO_MODE){
+    	Serial.println("Calibrating l-t-v sensor...");
 		int current_ltv = analogRead(lightSensorPin);
 		int prev_ltv = current_ltv;
 		int mean = 0;
@@ -37,16 +58,10 @@ void measurementSamplesSetup(int mode)
 		while (idle_iterations < 10){
 			current_ltv = analogRead(lightSensorPin);
 			if (abs(current_ltv - prev_ltv) < 5){
-				Serial.print(idle_iterations);
-				Serial.print("\t");
-				Serial.print(prev_ltv);
-				Serial.print("\t");
-				Serial.println(current_ltv);
 				ltv[idle_iterations] = current_ltv;
 				idle_iterations++;
 			}
 			else{
-				Serial.println("Reset");
 				ltv[10] = {0};
 				idle_iterations = 0;
 			}
@@ -58,29 +73,20 @@ void measurementSamplesSetup(int mode)
 		}
 		mean = mean/10;    
 		idle_ltv_val = mean;
-		Serial.print("Mean l-t-v: ");
-		Serial.println(mean);
     }
-
-    // Initialize sampling interval
-    startTimer3(mode);
-    pauseTimer3();
-    timer3ClearSamplingFlag();
 
     // Calibrate microphone measurements
 	if(mode == SOUND_MODE){
 		/* Change ADC's Vref to internal 2.56V */
-		Serial.println("ADC setup");
+		//Serial.println("ADC setup");
 		analogReference(INTERNAL);
 		int dummyRead;
 		for (int i = 0; i < 100; i++){
 			dummyRead = analogRead(A1);
-			Serial.println(dummyRead);
 		}
-		Serial.println("ADC setup commplete");
 
 
-		Serial.println("Calibrating microphone...");
+		Serial.println("Calibrating mic...");
 		int current_mic = analogRead(microphonePin);
 		int prev_mic = current_mic;
 		int mean = 0;
@@ -89,16 +95,10 @@ void measurementSamplesSetup(int mode)
 		while (idle_iterations < 10){
 			current_mic = analogRead(microphonePin);
 			if (abs(current_mic - prev_mic) < 5){
-				Serial.print(idle_iterations);
-				Serial.print("\t");
-				Serial.print(prev_mic);
-				Serial.print("\t");
-				Serial.println(current_mic);
 				mic[idle_iterations] = current_mic;
 				idle_iterations++;
 			}
 			else{
-				Serial.println("Reset");
 				mic[10] = {0};
 				idle_iterations = 0;
 			}
@@ -111,10 +111,6 @@ void measurementSamplesSetup(int mode)
 		mean = mean/10;    
 		idle_mic_val = mean;
 	}
-    measurementSamplesInitialize(mode);
-
-    /* ADC speed - prescaler 16 */ 
-    ADCSRA = (ADCSRA & B11111000) | 4; 
 }
 
 bool measurementSamplesCheckMeasuredFlag()

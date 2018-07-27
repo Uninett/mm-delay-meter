@@ -5,7 +5,8 @@
 
 #define BUF_SIZE		5
 
-void measurementSamplesSetup(int mode);
+void measurementSamplesSetup(uint8_t mode);
+void measurementSamplesSetMode(uint8_t mode);
 bool measurementSamplesCheckMeasuredFlag();
 
 void measurementSamplesInitialize(int mode);
