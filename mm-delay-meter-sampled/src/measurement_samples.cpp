@@ -14,7 +14,6 @@ unsigned short delta;
 unsigned long deltaMicros;
 int idle_mic_val;
 int idle_ltv_val;
-bool first_edge_detected;
 uint8_t i_m;
 
 int16_t samples[NUM_SAMPLES];
@@ -170,15 +169,15 @@ int16_t measurementSamplesMaxSmoothingFilter()
 }
 
 
-// Rising edge detection
+/* Rising edge detection */
 int16_t current_max;
 bool edge_detected;
 unsigned long deltaMicrosSaved[BUF_SIZE];
 
 
-bool measurementSamplesRisingEdgeDetection(int mode)
+
+bool measurementSamplesRisingEdgeDetection(uint8_t mode, bool start_new_series)
 {
-	static uint8_t i_m;
 	// Get timestamp as early as possible
 	delta = readTimer1();
 
@@ -190,10 +189,10 @@ bool measurementSamplesRisingEdgeDetection(int mode)
 	switch (mode)
 	{
 		case VIDEO_MODE:
-			edge_detected = measurementSamplesRisingEdgeDetectionVideo();
+			edge_detected = measurementSamplesRisingEdgeDetectionVideo(start_new_series);
 			break;
 		case SOUND_MODE:
-			edge_detected = measurementSamplesRisingEdgeDetectionSound();
+			edge_detected = measurementSamplesRisingEdgeDetectionSound(start_new_series);
 			break;
 	}
 
@@ -212,18 +211,12 @@ bool measurementSamplesRisingEdgeDetection(int mode)
 		else if (i_m == 1){
 			return true; // First edge detected
 		}
-		// if (!first_edge_detected){
-		// 	// Tell rest of program that the first successful measurements have started
-		// 	first_edge_detected = true;
-		// }
 	}
 	return false;
 }
 
-bool measurementSamplesRisingEdgeDetectionVideo()
 uint8_t getNumMeasurementsCompleted()
 {
-	static int16_t acc_pos_slopes;
 	return i_m;
 }
 void resetNumMeasurementsCompleted()
@@ -245,16 +238,23 @@ void clearMeasuredFlag()
 	measured_delay_flag = 0;
 }
 
+bool measurementSamplesRisingEdgeDetectionVideo(bool start_new_series)
+{
 	current_max = measurementSamplesMaxSmoothingFilter();
-	static int16_t prev_max = current_max;
 	edge_detected = false;
+
+	static int16_t acc_pos_slopes;
+	static int16_t prev_max = current_max;
+	if (start_new_series){
+		acc_pos_slopes = 0;
+		prev_max = current_max;
+	}
 
 	if (!light_recieved_at_sensor_flag){
 		if (current_max - prev_max > 10) edge_detected = true;
 		else{
 			if (current_max > prev_max){
 				acc_pos_slopes++;
-				//Serial.println(acc_pos_slopes);
 			} 
 			else acc_pos_slopes = 0;
 			if (acc_pos_slopes >= 5) edge_detected = true;
@@ -266,10 +266,12 @@ void clearMeasuredFlag()
 	return edge_detected;
 }
 
-bool measurementSamplesRisingEdgeDetectionSound()
+bool measurementSamplesRisingEdgeDetectionSound(bool start_new_series)
 {
 	static int16_t num_pos_measures;
-
+	if (start_new_series){
+		num_pos_measures = 0;
+	}
 	current_max = analogReadFast(microphonePin);
 	edge_detected = false;
 

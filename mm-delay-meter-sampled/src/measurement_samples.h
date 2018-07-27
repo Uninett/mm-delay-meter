@@ -11,9 +11,9 @@ bool measurementSamplesCheckMeasuredFlag();
 
 void measurementSamplesInitialize(uint8_t mode);
 int16_t measurementSamplesMaxSmoothingFilter();
-bool measurementSamplesRisingEdgeDetection(int mode);
-bool measurementSamplesRisingEdgeDetectionVideo();
-bool measurementSamplesRisingEdgeDetectionSound();
+bool measurementSamplesRisingEdgeDetection(uint8_t mode, bool start_new_series);
+bool measurementSamplesRisingEdgeDetectionVideo(bool start_new_series);
+bool measurementSamplesRisingEdgeDetectionSound(bool start_new_series);
 
 void measurementSamplesClearLightRecievedFlag();
 void measurementSamplesClearSoundRecievedFlag();
