@@ -26,7 +26,7 @@ void SDCardGenerateNewFile(String &name)
 }
 
 
-String SDCardLogger(String start_time, String date) {
+String SDCardLogger(String start_time, String date, uint8_t measurements) {
     // open the file. note that only one file can be open at a time,
     // so you have to close this one before opening another.
     String filename = "";
@@ -62,7 +62,9 @@ String SDCardLogger(String start_time, String date) {
     date.trim();
     time_string = String(hour) + ":" + String(minute);
 
-    for (uint8_t i = 0; i < BUF_SIZE; i++){
+    uint8_t max;
+    if (measurements == 0) max = BUF_SIZE; else max = measurements;
+    for (uint8_t i = 0; i < max; i++){
     	if (i >= 30){
 	    	// A minute has passed
 	    	if (minute < 59){
@@ -83,7 +85,7 @@ String SDCardLogger(String start_time, String date) {
     	data_string += ",";
     	data_string += delayMillis;
     	data_string += "\n";
-    	Serial.println("Date: " + date + "\tTime: " + time_string);
+    	//Serial.println("Date: " + date + "\tTime: " + time_string);
     }
 
     // if the file is available, write to it:
@@ -96,5 +98,10 @@ String SDCardLogger(String start_time, String date) {
     else {
         Serial.println("error opening " + filename);
     }
+    // Reset to default values, ready for new measurements
+    resetNumMeasurementsCompleted();
+	resetSavedMeasurements();
+	clearMeasuredFlag();
+
     return filename;
 }
