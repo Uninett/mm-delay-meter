@@ -1,6 +1,6 @@
 #pragma once
 
-void signalGeneratorSetup(int mode);
+void signalGeneratorSetup();
 void signalGeneratorLEDOn();
 void signalGeneratorLEDOff();
 void signalGeneratorSpeakerOn();

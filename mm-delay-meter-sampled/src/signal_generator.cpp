@@ -6,7 +6,7 @@
 #include "measurement_samples.h"
 #include "config.h"
 
-void signalGeneratorSetup(int mode)
+void signalGeneratorSetup()
 {
 	timer1ClearFlags();
 	startTimer1();
