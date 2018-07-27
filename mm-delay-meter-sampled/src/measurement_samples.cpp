@@ -109,9 +109,7 @@ void measurementSamplesSetup(int mode)
 			mean += m;
 		}
 		mean = mean/10;    
-		setIdleMicVal(mean);
-		Serial.print("Mean: ");
-		Serial.println(mean);
+		idle_mic_val = mean;
 	}
     measurementSamplesInitialize(mode);
 
@@ -274,15 +272,6 @@ bool measurementSamplesRisingEdgeDetectionSound()
 	return edge_detected;
 }
 
-void setIdleMicVal(int val)
-{
-	idle_mic_val = val;
-}
-
-double measurementSamplesGetDelayMs()
-{
-	return deltaMicros/1000.0;
-}
 
 void measurementSamplesClearLightRecievedFlag()
 {
