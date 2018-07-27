@@ -221,8 +221,29 @@ bool measurementSamplesRisingEdgeDetection(int mode)
 }
 
 bool measurementSamplesRisingEdgeDetectionVideo()
+uint8_t getNumMeasurementsCompleted()
 {
 	static int16_t acc_pos_slopes;
+	return i_m;
+}
+void resetNumMeasurementsCompleted()
+{
+	i_m = 0;
+}
+void resetSavedMeasurements()
+{
+	for (uint8_t i = 0; i < BUF_SIZE; i++){
+		deltaMicrosSaved[i] = 0;
+	}
+}
+void setMeasuredFlag()
+{
+	measured_delay_flag = 1;
+}
+void clearMeasuredFlag()
+{
+	measured_delay_flag = 0;
+}
 
 	current_max = measurementSamplesMaxSmoothingFilter();
 	static int16_t prev_max = current_max;

@@ -19,3 +19,10 @@ void measurementSamplesClearLightRecievedFlag();
 void measurementSamplesClearSoundRecievedFlag();
 
 String measurementSamplesGetSavedSample(uint8_t index);
+
+uint8_t getNumMeasurementsCompleted();
+void resetNumMeasurementsCompleted();
+void resetSavedMeasurements();
+void setMeasuredFlag();
+void clearMeasuredFlag();
+
