@@ -7,15 +7,13 @@
 #include "src/wifi.h"
 #include <Process.h>
 
-
-volatile timer_event_t  timer_event       = NONE;
 volatile uint8_t        count             = 0;
-volatile bool           mode_button       = 0;
-volatile bool           prev_mode_button  = 0;
+volatile bool           mode_button       = false;
+volatile bool           prev_mode_button  = false;
 volatile bool           start_new_series  = false;
 volatile bool           mode_change_flag  = false;
 volatile bool           running           = false;
-uint8_t mode          = VIDEO_MODE;
+volatile uint8_t mode = VIDEO_MODE;
 uint8_t wifi_attempts = 0;
 bool    time_status   = false;   // true if the unit has been connected to wifi since power-up
 volatile bool    mode_changed  = false;
