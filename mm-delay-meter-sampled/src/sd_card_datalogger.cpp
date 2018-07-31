@@ -66,8 +66,8 @@ String SDCardLogger(String start_time, String date, uint8_t measurements, char m
     uint8_t max;
     if (measurements == 0) max = BUF_SIZE; else max = measurements;
     for (uint8_t i = 0; i < max; i++){
-    	if (i >= 30){
-	    	// A minute has passed
+    	if (i >= 15){
+	    	// A minute has passed, ~4 sec between each measurement
 	    	if (minute < 59){
 	    		minute++;
 	    	}
@@ -85,7 +85,9 @@ String SDCardLogger(String start_time, String date, uint8_t measurements, char m
     	data_string += time_string;
     	data_string += ",";
     	data_string += delayMillis;
-    	data_string += "\n";
+    	if ( i < max - 1 ){
+    		data_string += "\n";
+    	}
     	//Serial.println("Date: " + date + "\tTime: " + time_string);
     }
 
