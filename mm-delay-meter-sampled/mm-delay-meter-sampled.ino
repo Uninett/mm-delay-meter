@@ -22,6 +22,10 @@ String  networkId     = "UNINETT_guest";
 String  date;
 String  start_time;
 Process p;
+volatile unsigned long lastDebounceTime = 0;
+volatile unsigned long debounceDelay = 50; 
+volatile uint8_t lastButtonState = LOW;
+volatile uint8_t buttonState = LOW;
 
 void setup() {
   
@@ -43,17 +47,37 @@ void setup() {
   digitalWrite(startIndicator, LOW);
   digitalWrite(videoModeIndicator, HIGH);
   digitalWrite(soundModeIndicator, LOW);
-  // Configure external interrupt INT0, rising edge
+  // Configure external interrupt INT0, rising edge, D3
   EICRA |= (1 << ISC01) | (1 << ISC00);
+  //EICRA &= ~(1 << ISC01);
+  //EICRA &= ~(1 << ISC00);
   EIMSK |= (1 << INT0);
-  // Configure timer 0: normal mode, prescaler 1024, enable compare match interrupt
-  // For button polling
-  TCCR0A = 0;
-  TIMSK0 |= (1 << OCIE0A);
-  TCCR0B |= (1 << CS02) | (1 << CS00);
-  TCCR0B &= ~(1 << CS01);
-  OCR0A = 150; // Value between 0 and 255
+  // Configure external interrupt INT6, rising edge, D7
+//  EICRB |= (1 << ISC61) | (1 << ISC60); 
+//  EICRB |= (1 << ISC61);
+//  EICRB &= ~(1 << ISC60);
+//  EIMSK |= (1 << INT6); 
+  // Configure external interrupt INT1, edge, D2
+  //EICRA |= (1 << ISC11) | (1 << ISC10); 
+  EICRA &= ~(1 << ISC11);
+  EICRA |= (1 << ISC10);
+  EIMSK |= (1 << INT1); 
+//  // Configure timer 0: normal mode, prescaler 1024, enable compare match interrupt
+//  // For button polling
+//  TCCR0A = 0;
+//  TIMSK0 |= (1 << OCIE0A);
+//  TCCR0B |= (1 << CS02) | (1 << CS00);
+//  TCCR0B &= ~(1 << CS01);
+//  OCR0A = 150; // Value between 0 and 255
   // Pause: TCCR0B = 0; Start: TCCR0B = B00000101; Reset: fix interrupts and set TCNT0 = 0;
+  // Configure timer 4 instead of 0
+//  TCCR4A = 0;
+//  TCCR4B = B00001011; // prescaler 1024
+//  TCCR4C = 0;
+//  TCCR4D = 0;
+//  TCCR4E = 0;
+//  TIMSK4 |= (1 << TOIE4);
+  
   interrupts();
 
   SDCardSetup();
@@ -236,7 +260,15 @@ void loop() {
     else{
       Serial.println("WiFi still not connected. Try again later.");
     }
-    
+  }
+
+  /* Reenable interrupts if enough time has passed since previous interrupt, 
+     and the button was released */
+  if (millis() - lastDebounceTime > debounceDelay){
+    buttonState = ((PIND & (1 << PD1)) == (1 << PD1));
+    if (buttonState == LOW){
+      EIMSK |= (1 << INT1);
+    }
   }
 }
 
@@ -279,31 +311,32 @@ ISR(INT0_vect)
   }
 }
 
-ISR (TIMER0_COMPA_vect) 
-{
-  // Poll mode button
-  count++;
-  if (count >= 3){
-    count = 0;
-    
-    mode_button = ((PINE & (1 << PE6)) == (1 << PE6));
-    if (mode_button && !prev_mode_button){
-      
-      if (mode == VIDEO_MODE){
-        mode = SOUND_MODE;
-        // Turn off video led
-        digitalWrite(videoModeIndicator, LOW);
-        // Turn on sound led
-        digitalWrite(soundModeIndicator, HIGH);
+ISR(INT1_vect) 
+{ 
+  // Disable interrupts from this pin
+  EIMSK &= ~(1 << INT1);
+  // Digital pin 2 = (SDA/INT1) PD1
+  buttonState = ((PIND & (1 << PD1)) == (1 << PD1));
+  
+  // If some time has passed since the last interrupt
+  if (millis() - lastDebounceTime > debounceDelay){
+    // Check if the button was pressed, not released
+    if (buttonState == HIGH && lastButtonState == LOW){
+      mode_count++;
+      if (mode == VIDEO_MODE){ 
+        mode = SOUND_MODE; 
+        // Turn off video led 
+        digitalWrite(videoModeIndicator, LOW); 
+        // Turn on sound led 
+        digitalWrite(soundModeIndicator, HIGH); 
+      } 
+      else{ 
+        mode = VIDEO_MODE; 
+        // Turn off sound led 
+        digitalWrite(soundModeIndicator, LOW); 
+        // Turn on video led 
+        digitalWrite(videoModeIndicator, HIGH); 
       }
-      else{
-        mode = VIDEO_MODE;
-        // Turn off sound led
-        digitalWrite(soundModeIndicator, LOW);
-        // Turn on video led
-        digitalWrite(videoModeIndicator, HIGH);
-      }
-      
       if (running){
         Serial.println("Stopping");
         running = false;
@@ -323,9 +356,10 @@ ISR (TIMER0_COMPA_vect)
         }
       }
       measurementSamplesSetMode(mode);
-      measurementSamplesInitialize(mode);
+      measurementSamplesInitialize(mode); 
     }
-    prev_mode_button = mode_button;
   }
+  lastDebounceTime = millis();
+  lastButtonState = buttonState;
 }
 

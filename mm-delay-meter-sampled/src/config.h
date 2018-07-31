@@ -2,7 +2,7 @@
 
 //#define speakerPin  				11	// OC0A
 #define startPin					3	// INT0
-#define modeSelectPin				7	// INT6
+#define modeSelectPin				2	// INT6
 #define buzzerPin					8
 #define startIndicator				9
 #define videoModeIndicator			10
