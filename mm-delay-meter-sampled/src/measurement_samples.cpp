@@ -46,8 +46,13 @@ void measurementSamplesSetMode(uint8_t mode)
     startTimer3(mode);
     pauseTimer3();
     timer3ClearSamplingFlag();
-    
+
 	if (mode == VIDEO_MODE){
+		analogReference(DEFAULT);
+		int dummyRead;
+		for (int i = 0; i < 100; i++){
+			dummyRead = analogRead(A0);
+		}
     	Serial.println("Calibrating l-t-v sensor...");
 		int current_ltv = analogRead(lightSensorPin);
 		int prev_ltv = current_ltv;
@@ -280,7 +285,7 @@ bool measurementSamplesRisingEdgeDetectionSound(bool start_new_series)
 		else{
 			if (current_max > idle_mic_val+1){
 				num_pos_measures++;
-				Serial.println(num_pos_measures);
+				//Serial.println(num_pos_measures);
 			} 
 			else num_pos_measures = 0;
 			if (num_pos_measures >= 2) edge_detected = true; 
