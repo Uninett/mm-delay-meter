@@ -18,6 +18,7 @@ volatile bool           running           = false;
 uint8_t mode          = VIDEO_MODE;
 uint8_t wifi_attempts = 0;
 bool    time_status   = false;   // true if the unit has been connected to wifi since power-up
+volatile bool    mode_stop  = false;
 String  networkId     = "UNINETT_guest";
 String  date;
 String  start_time;
@@ -210,10 +211,18 @@ void loop() {
     running = false;
     digitalWrite(startIndicator, LOW);
     
-    String file = SDCardLogger(start_time, date, getNumMeasurementsCompleted());
+    char mode_char;
+    if (mode_stop){
+      mode_char = (mode == VIDEO_MODE) ? 'A' : 'V';
+    }
+    else{
+      mode_char = (mode == VIDEO_MODE) ? 'V' : 'A';
+    }
+    mode_stop = false;
+    
+    String file = SDCardLogger(start_time, date, getNumMeasurementsCompleted(), mode_char);
     
     /* Check WiFi connection */
-    
     if (!wifiStatus(p)){
       /* Not connected. Try again */
       Serial.println("WiFi not connected. Trying to reconnect...");
@@ -350,9 +359,11 @@ ISR(INT1_vect)
           Serial.print("Num measurements: ");
           Serial.println(getNumMeasurementsCompleted());
           setMeasuredFlag();
+          mode_stop = true;
         }
         else{
           clearMeasuredFlag(); //???
+          mode_stop = false;
         }
       }
       measurementSamplesSetMode(mode);

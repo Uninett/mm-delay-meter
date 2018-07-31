@@ -12,11 +12,12 @@ void SDCardSetup() {
     FileSystem.begin();
 }
 
-void SDCardGenerateNewFile(String &name)
+void SDCardGenerateNewFile(String &name, char mode)
 {	
 	// Create new file with unique name in /mnt/sda1/arduino/delay directory
 	Process f;
-	f.runShellCommand("echo $(mktemp -t -p /mnt/sd/arduino/delay)");
+	f.runShellCommand("echo $(mktemp -p /mnt/sd/arduino/delay " + String(mode) + ".XXXXXX)");
+	//f.runShellCommand("echo $(mktemp -t -p /mnt/sd/arduino/delay)");
 	while (f.running());
 	while (f.available() > 0){
 		char c = f.read();
@@ -26,11 +27,11 @@ void SDCardGenerateNewFile(String &name)
 }
 
 
-String SDCardLogger(String start_time, String date, uint8_t measurements) {
+String SDCardLogger(String start_time, String date, uint8_t measurements, char mode) {
     // open the file. note that only one file can be open at a time,
     // so you have to close this one before opening another.
     String filename = "";
-    SDCardGenerateNewFile(filename);
+    SDCardGenerateNewFile(filename, mode);
     Serial.print("File name: ");
     Serial.println(filename);
     File dataFile = FileSystem.open(filename.c_str(), FILE_APPEND);
