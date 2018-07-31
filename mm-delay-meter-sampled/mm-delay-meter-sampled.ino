@@ -18,6 +18,7 @@ volatile bool           running           = false;
 uint8_t mode          = VIDEO_MODE;
 uint8_t wifi_attempts = 0;
 bool    time_status   = false;   // true if the unit has been connected to wifi since power-up
+volatile bool    mode_changed  = false;
 volatile bool    mode_stop  = false;
 String  networkId     = "UNINETT_guest";
 String  date;
@@ -156,7 +157,11 @@ void setup() {
 }
 
 void loop() {
-  
+  if (mode_changed){
+    mode_changed = false;
+    measurementSamplesSetMode(mode);
+    measurementSamplesInitialize(mode); 
+  }
   if (timer1CheckFlag(OVF)){
     signalGeneratorLEDOn();
     if (mode == SOUND_MODE){
@@ -366,8 +371,9 @@ ISR(INT1_vect)
           mode_stop = false;
         }
       }
-      measurementSamplesSetMode(mode);
-      measurementSamplesInitialize(mode); 
+      mode_changed = true;
+//      measurementSamplesSetMode(mode);
+//      measurementSamplesInitialize(mode); 
     }
   }
   lastDebounceTime = millis();
