@@ -5,6 +5,7 @@
 #include "src/measurement_samples.h"
 #include "src/sd_card_datalogger.h"
 #include "src/wifi.h"
+#include "src/logger.h"
 #include <Process.h>
 
 volatile bool           mode_button       = false;
@@ -21,12 +22,12 @@ String  networkId     = "UNINETT_guest";
 String  date;
 String  start_time;
 bool first_edge;
-Process p;
 volatile unsigned long lastDebounceTime = 0;
 volatile unsigned long debounceDelay = 50; 
 volatile uint8_t lastButtonState = LOW;
 volatile uint8_t buttonState = LOW;
-
+Process p;
+Logger Log;
 
 
 void setup() {
@@ -38,6 +39,8 @@ void setup() {
   Bridge.begin();
   Serial.println("Bridge setup complete");
   digitalWrite(LED_BUILTIN, HIGH);
+  
+  Log.begin();
 
   /* SETUP */
   pinMode(statusLedPin1, OUTPUT);
@@ -137,7 +140,7 @@ void setup() {
     date += c;
   }
   Serial.println(date);
-
+  Log.println(date);
   //ADD: blink when ready (after 20-30 sec?)
 
 }
