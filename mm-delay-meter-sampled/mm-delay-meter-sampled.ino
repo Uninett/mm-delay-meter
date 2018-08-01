@@ -40,14 +40,16 @@ void setup() {
   digitalWrite(LED_BUILTIN, HIGH);
 
   /* SETUP */
-  pinMode(startIndicator, OUTPUT);
-  pinMode(videoModeIndicator, OUTPUT);
+  pinMode(statusLedPin1, OUTPUT);
   pinMode(soundModeIndicator, OUTPUT);
+  pinMode(videoModeIndicator, OUTPUT);
+  pinMode(startIndicator, OUTPUT);
   pinMode(modeSelectPin, INPUT);
   pinMode(startPin, INPUT);
-  digitalWrite(startIndicator, LOW);
-  digitalWrite(videoModeIndicator, HIGH);
+  digitalWrite(statusLedPin1, LOW);
   digitalWrite(soundModeIndicator, LOW);
+  digitalWrite(videoModeIndicator, HIGH);
+  digitalWrite(startIndicator, LOW);
   // Configure external interrupt INT0, rising edge, D3
   EICRA |= (1 << ISC01) | (1 << ISC00);
   //EICRA &= ~(1 << ISC01);
@@ -281,6 +283,8 @@ ISR(INT0_vect)
     resumeTimer3();
     resumeTimer1();
     digitalWrite(startIndicator, HIGH);
+    digitalWrite(soundModeIndicator, LOW);
+    digitalWrite(videoModeIndicator, LOW);
   }
   /* STOP */
   else if (running){
@@ -290,6 +294,14 @@ ISR(INT0_vect)
     signalGeneratorLEDOff();
     signalGeneratorSpeakerOff();
     digitalWrite(startIndicator, LOW);
+    if (mode == VIDEO_MODE){
+      digitalWrite(videoModeIndicator, HIGH);
+      digitalWrite(soundModeIndicator, LOW); 
+    } 
+    else{
+      digitalWrite(videoModeIndicator, LOW);
+      digitalWrite(soundModeIndicator, HIGH); 
+    }
     // Save if something can be saved
     if (getNumMeasurementsCompleted() > 0){
       setMeasuredFlag();
