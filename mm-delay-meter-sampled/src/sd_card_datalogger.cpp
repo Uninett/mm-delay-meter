@@ -87,7 +87,6 @@ String SDCardLogger(String start_time, String date, uint8_t measurements, char m
     	if ( i < max - 1 ){
     		data_string += "\n";
     	}
-    	//Serial.println("Date: " + date + "\tTime: " + time_string);
     }
 
     // if the file is available, write to it:

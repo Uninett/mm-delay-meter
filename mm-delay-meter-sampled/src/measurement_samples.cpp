@@ -57,16 +57,16 @@ void measurementSamplesSetMode(uint8_t mode)
 		int current_ltv = analogRead(lightSensorPin);
 		int prev_ltv = current_ltv;
 		int mean = 0;
-		int ltv[10] = {0};
+		int ltv[NUM_SAMPLES] = {0};
 		int idle_iterations = 0;
-		while (idle_iterations < 10){
+		while (idle_iterations < NUM_SAMPLES){
 			current_ltv = analogRead(lightSensorPin);
 			if (abs(current_ltv - prev_ltv) < 5){
 				ltv[idle_iterations] = current_ltv;
 				idle_iterations++;
 			}
 			else{
-				ltv[10] = {0};
+				ltv[NUM_SAMPLES] = {0};
 				idle_iterations = 0;
 			}
 			prev_ltv = current_ltv;
@@ -75,7 +75,7 @@ void measurementSamplesSetMode(uint8_t mode)
 		for (auto &v: ltv){
 			mean += v;
 		}
-		mean = mean/10;    
+		mean = mean/NUM_SAMPLES;    
 		idle_ltv_val = mean;
     }
 
@@ -94,16 +94,16 @@ void measurementSamplesSetMode(uint8_t mode)
 		int current_mic = analogRead(microphonePin);
 		int prev_mic = current_mic;
 		int mean = 0;
-		int mic[10] = {0};
+		int mic[NUM_SAMPLES] = {0};
 		int idle_iterations = 0;
-		while (idle_iterations < 10){
+		while (idle_iterations < NUM_SAMPLES){
 			current_mic = analogRead(microphonePin);
 			if (abs(current_mic - prev_mic) < 5){
 				mic[idle_iterations] = current_mic;
 				idle_iterations++;
 			}
 			else{
-				mic[10] = {0};
+				mic[NUM_SAMPLES] = {0};
 				idle_iterations = 0;
 			}
 			prev_mic = current_mic;
@@ -112,7 +112,7 @@ void measurementSamplesSetMode(uint8_t mode)
 		for (auto &m: mic){
 			mean += m;
 		}
-		mean = mean/10;    
+		mean = mean/NUM_SAMPLES;    
 		idle_mic_val = mean;
 	}
 }
@@ -120,7 +120,7 @@ void measurementSamplesSetMode(uint8_t mode)
 bool measurementSamplesCheckMeasuredFlag()
 {
 	if (measured_delay_flag){ 
-    	measured_delay_flag = 0;
+    	//measured_delay_flag = 0;
     	return true;
  	}
  	else{
@@ -300,7 +300,6 @@ bool measurementSamplesRisingEdgeDetectionSound(bool start_new_series)
 		else{
 			if (current_max > idle_mic_val+1){
 				num_pos_measures++;
-				//Serial.println(num_pos_measures);
 			} 
 			else num_pos_measures = 0;
 			if (num_pos_measures >= 2) edge_detected = true; 

@@ -68,27 +68,6 @@ ISR(TIMER1_COMPA_vect){
 	timer1_comp_match_flag = 1;
 }
 
-bool timer1CheckOvfFlag()
-{
-	if (timer1_ovf_flag){
-		timer1_ovf_flag = 0;
-		return true;
-	}
-	else{
-		return false;
-	}
-}
-
-bool timer1CheckCompFlag()
-{
-	if (timer1_comp_match_flag){
-		timer1_comp_match_flag = 0;
-		return true;
-	}
-	else{
-		return false;
-	}
-}
 bool timer1CheckFlag(uint8_t flag_type)
 {
 	switch (flag_type){

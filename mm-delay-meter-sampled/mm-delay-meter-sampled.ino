@@ -200,6 +200,7 @@ void loop() {
     }
   }
   if (measurementSamplesCheckMeasuredFlag()){
+    clearMeasuredFlag();
     // A full measurement series is complete
     Serial.println("Measurement series finished.");
     stopMeasurement();

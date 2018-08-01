@@ -25,7 +25,5 @@ extern void startTimer1(void);
 extern uint16_t readTimer1(void);
 extern void resetTimer1(void);
 
-bool timer1CheckOvfFlag();
-bool timer1CheckCompFlag();
 bool timer1CheckFlag(uint8_t flag_type);
 void timer1ClearFlags();
