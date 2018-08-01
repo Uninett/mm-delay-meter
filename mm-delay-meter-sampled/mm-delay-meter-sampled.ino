@@ -146,8 +146,13 @@ void setup() {
 void loop() {
   if (mode_changed){
     mode_changed = false;
+    setModeLEDs();
     measurementSamplesSetMode(mode);
     measurementSamplesInitialize(mode); 
+  }
+  if (start_measurements){
+    startMeasurement();
+    start_measurements = false;
   }
   
   if (timer1CheckFlag(OVF)){
@@ -250,6 +255,7 @@ void loop() {
     else{
       Serial.println("WiFi still not connected. Try again later.");
     }
+    setAllLEDs();
   }
 
   /* Reenable interrupts if enough time has passed since previous interrupt, 
@@ -262,14 +268,11 @@ void loop() {
   }
 }
 
-
-
-
 ISR(INT0_vect)
 {
   /* START */
   if (!running){
-    startMeasurement();
+    start_measurements = true;
   }
   /* STOP */
   else if (running){
@@ -279,6 +282,9 @@ ISR(INT0_vect)
       setMeasuredFlag();
       Serial.print("Num measurements: ");
       Serial.println(getNumMeasurementsCompleted());
+    }
+    else{
+      setAllLEDs();
     }
   }
 }
@@ -296,13 +302,9 @@ ISR(INT1_vect)
     if (buttonState == HIGH && lastButtonState == LOW){
       if (mode == VIDEO_MODE){ 
         mode = SOUND_MODE;
-        digitalWrite(videoModeIndicator, LOW);
-        digitalWrite(soundModeIndicator, HIGH); 
       } 
       else{ 
-        mode = VIDEO_MODE;
-        digitalWrite(soundModeIndicator, LOW);
-        digitalWrite(videoModeIndicator, HIGH); 
+        mode = VIDEO_MODE; 
       }
       if (running){
         Serial.println("Stopping");
@@ -317,6 +319,7 @@ ISR(INT1_vect)
         else{
           clearMeasuredFlag(); //???
           mode_stopped = false;
+          setAllLEDs();
         }
       }
       mode_changed = true;
@@ -345,7 +348,17 @@ void stopMeasurement()
   pauseTimer3();
   signalGeneratorLEDOff();
   signalGeneratorSpeakerOff();
+}
+
+void setAllLEDs()
+{
   digitalWrite(startIndicator, LOW);
+  setModeLEDs();
+  digitalWrite(statusLedPin1, LOW);
+}
+
+void setModeLEDs()
+{
   if (mode == VIDEO_MODE){
     digitalWrite(videoModeIndicator, HIGH);
     digitalWrite(soundModeIndicator, LOW); 
