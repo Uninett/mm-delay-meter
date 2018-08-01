@@ -6,6 +6,7 @@
 #include "src/sd_card_datalogger.h"
 #include "src/wifi.h"
 #include "src/logger.h"
+#include "src/ui.h"
 #include <Process.h>
 
 volatile bool           mode_button       = false;
@@ -37,43 +38,10 @@ void setup() {
   /* Bridge startup */
   Serial.println("Bridge...");
   Bridge.begin();
-  Serial.println("Bridge setup complete");
   digitalWrite(LED_BUILTIN, HIGH);
-  
+
+  /* Log */
   Log.begin();
-
-  /* SETUP */
-  pinMode(statusLedPin1, OUTPUT);
-  pinMode(soundModeIndicator, OUTPUT);
-  pinMode(videoModeIndicator, OUTPUT);
-  pinMode(startIndicator, OUTPUT);
-  pinMode(modeSelectPin, INPUT);
-  pinMode(startPin, INPUT);
-  digitalWrite(statusLedPin1, LOW);
-  digitalWrite(soundModeIndicator, LOW);
-  digitalWrite(videoModeIndicator, HIGH);
-  digitalWrite(startIndicator, LOW);
-  // Configure external interrupt INT0, rising edge, D3
-  EICRA |= (1 << ISC01) | (1 << ISC00);
-  //EICRA &= ~(1 << ISC01);
-  //EICRA &= ~(1 << ISC00);
-  EIMSK |= (1 << INT0);
-  // Configure external interrupt INT6, rising edge, D7
-//  EICRB |= (1 << ISC61) | (1 << ISC60); 
-//  EICRB |= (1 << ISC61);
-//  EICRB &= ~(1 << ISC60);
-//  EIMSK |= (1 << INT6); 
-  // Configure external interrupt INT1, edge, D2
-  //EICRA |= (1 << ISC11) | (1 << ISC10); 
-  EICRA &= ~(1 << ISC11);
-  EICRA |= (1 << ISC10);
-  EIMSK |= (1 << INT1); 
-  
-  interrupts();
-
-  SDCardSetup();
-  signalGeneratorSetup();
-  measurementSamplesSetup(mode);
 
   /* WiFi */
   p.begin("date");
@@ -141,17 +109,25 @@ void setup() {
   }
   Serial.println(date);
   Log.println(date);
-  //ADD: blink when ready (after 20-30 sec?)
-
+  
+  /* SETUP */
+  SDCardSetup();
+  signalGeneratorSetup();
+  measurementSamplesSetup(mode);
+  uiSetup();
+  
+  interrupts();
 }
 
 
 void loop() {
   if (mode_changed){
-    mode_changed = false;
-    setModeLEDs();
-    measurementSamplesSetMode(mode);
-    measurementSamplesInitialize(mode); 
+    if (!measurementSamplesCheckMeasuredFlag()){
+      mode_changed = false;
+      setModeLEDs(mode);
+      measurementSamplesSetMode(mode);
+      measurementSamplesInitialize(mode); 
+    }    
   }
   if (start_measurements){
     startMeasurement();
@@ -259,7 +235,7 @@ void loop() {
     else{
       Serial.println("WiFi still not connected. Try again later.");
     }
-    setAllLEDs();
+    setAllLEDs(mode);
   }
 
   /* Reenable interrupts if enough time has passed since previous interrupt, 
@@ -288,7 +264,7 @@ ISR(INT0_vect)
       Serial.println(getNumMeasurementsCompleted());
     }
     else{
-      setAllLEDs();
+      setAllLEDs(mode);
     }
   }
 }
@@ -311,7 +287,6 @@ ISR(INT1_vect)
         mode = VIDEO_MODE; 
       }
       if (running){
-        Serial.println("Stopping");
         stopMeasurement();
         // Save if something can be saved
         if (getNumMeasurementsCompleted() > 0){
@@ -321,9 +296,9 @@ ISR(INT1_vect)
           mode_stopped = true;
         }
         else{
-          clearMeasuredFlag(); //???
+          clearMeasuredFlag();
           mode_stopped = false;
-          setAllLEDs();
+          setAllLEDs(mode);
         }
       }
       mode_changed = true;
@@ -354,22 +329,5 @@ void stopMeasurement()
   signalGeneratorSpeakerOff();
 }
 
-void setAllLEDs()
-{
-  digitalWrite(startIndicator, LOW);
-  setModeLEDs();
-  digitalWrite(statusLedPin1, LOW);
-}
 
-void setModeLEDs()
-{
-  if (mode == VIDEO_MODE){
-    digitalWrite(videoModeIndicator, HIGH);
-    digitalWrite(soundModeIndicator, LOW); 
-  } 
-  else{
-    digitalWrite(videoModeIndicator, LOW);
-    digitalWrite(soundModeIndicator, HIGH); 
-  }
-}
 
