@@ -194,18 +194,11 @@ void loop() {
   if (measurementSamplesCheckMeasuredFlag()){
     // A full measurement series is complete
     Serial.println("Measurement series finished.");
-    pauseTimer1();
-    pauseTimer3();
-    signalGeneratorLEDOff();
-    if (mode == SOUND_MODE){
-      signalGeneratorSpeakerOff();
-    }
-    running = false;
-    digitalWrite(startIndicator, LOW);
+    stopMeasurement();
     
     char mode_char;
     if (mode_stopped){ mode_char = (mode == VIDEO_MODE) ? 'A' : 'V'; }
-    else{           mode_char = (mode == VIDEO_MODE) ? 'V' : 'A'; }
+    else{              mode_char = (mode == VIDEO_MODE) ? 'V' : 'A'; }
     mode_stopped = false;
     
     String file = SDCardLogger(start_time, date, getNumMeasurementsCompleted(), mode_char);
@@ -276,32 +269,11 @@ ISR(INT0_vect)
 {
   /* START */
   if (!running){
-    running = true;
-    start_new_series = true;
-    resetTimer3();
-    resetTimer1();
-    resumeTimer3();
-    resumeTimer1();
-    digitalWrite(startIndicator, HIGH);
-    digitalWrite(soundModeIndicator, LOW);
-    digitalWrite(videoModeIndicator, LOW);
+    startMeasurement();
   }
   /* STOP */
   else if (running){
-    running = false;
-    pauseTimer3();
-    pauseTimer1();
-    signalGeneratorLEDOff();
-    signalGeneratorSpeakerOff();
-    digitalWrite(startIndicator, LOW);
-    if (mode == VIDEO_MODE){
-      digitalWrite(videoModeIndicator, HIGH);
-      digitalWrite(soundModeIndicator, LOW); 
-    } 
-    else{
-      digitalWrite(videoModeIndicator, LOW);
-      digitalWrite(soundModeIndicator, HIGH); 
-    }
+    stopMeasurement();
     // Save if something can be saved
     if (getNumMeasurementsCompleted() > 0){
       setMeasuredFlag();
@@ -323,27 +295,18 @@ ISR(INT1_vect)
     // Check if the button was pressed, not released
     if (buttonState == HIGH && lastButtonState == LOW){
       if (mode == VIDEO_MODE){ 
-        mode = SOUND_MODE; 
-        // Turn off video led 
-        digitalWrite(videoModeIndicator, LOW); 
-        // Turn on sound led 
+        mode = SOUND_MODE;
+        digitalWrite(videoModeIndicator, LOW);
         digitalWrite(soundModeIndicator, HIGH); 
       } 
       else{ 
-        mode = VIDEO_MODE; 
-        // Turn off sound led 
-        digitalWrite(soundModeIndicator, LOW); 
-        // Turn on video led 
+        mode = VIDEO_MODE;
+        digitalWrite(soundModeIndicator, LOW);
         digitalWrite(videoModeIndicator, HIGH); 
       }
       if (running){
         Serial.println("Stopping");
-        running = false;
-        pauseTimer1();
-        pauseTimer3();
-        signalGeneratorSpeakerOff();
-        signalGeneratorLEDOff();
-        digitalWrite(startIndicator, LOW);
+        stopMeasurement();
         // Save if something can be saved
         if (getNumMeasurementsCompleted() > 0){
           Serial.print("Num measurements: ");
@@ -361,5 +324,35 @@ ISR(INT1_vect)
   }
   lastDebounceTime = millis();
   lastButtonState = buttonState;
+}
+
+void startMeasurement()
+{
+  running = true;
+  start_new_series = true;
+  resetTimer3();
+  resetTimer1();
+  resumeTimer3();
+  resumeTimer1();
+  digitalWrite(startIndicator, HIGH);
+  digitalWrite(soundModeIndicator, LOW);
+  digitalWrite(videoModeIndicator, LOW);
+}
+void stopMeasurement()
+{
+  running = false;
+  pauseTimer1();
+  pauseTimer3();
+  signalGeneratorLEDOff();
+  signalGeneratorSpeakerOff();
+  digitalWrite(startIndicator, LOW);
+  if (mode == VIDEO_MODE){
+    digitalWrite(videoModeIndicator, HIGH);
+    digitalWrite(soundModeIndicator, LOW); 
+  } 
+  else{
+    digitalWrite(videoModeIndicator, LOW);
+    digitalWrite(soundModeIndicator, HIGH); 
+  }
 }
 
