@@ -17,7 +17,6 @@ void SDCardGenerateNewFile(String &name, char mode)
 	// Create new file with unique name in /mnt/sda1/arduino/delay directory
 	Process f;
 	f.runShellCommand("echo $(mktemp -p /mnt/sd/arduino/delay " + String(mode) + ".XXXXXX)");
-	//f.runShellCommand("echo $(mktemp -t -p /mnt/sd/arduino/delay)");
 	while (f.running());
 	while (f.available() > 0){
 		char c = f.read();
