@@ -3,7 +3,10 @@
 #include <inttypes.h>
 #include "Arduino.h"
 
-#define BUF_SIZE		5
+#define BUF_SIZE		6
+#define BUF_PART_1		2
+#define BUF_PART_2		4
+
 
 void measurementSamplesSetup(uint8_t mode);
 void measurementSamplesSetMode(uint8_t mode);

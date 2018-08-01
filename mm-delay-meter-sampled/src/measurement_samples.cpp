@@ -209,6 +209,21 @@ bool measurementSamplesRisingEdgeDetection(uint8_t mode, bool start_new_series)
 		Serial.print(i_m);
 		Serial.print("\t");
 		Serial.println(deltaMicrosSaved[i_m-1]);
+		if (i_m > 0 && i_m <= BUF_PART_1){
+			// Blink statusLed1
+			digitalWrite(statusLedPin1, HIGH);
+		}
+		else if (i_m > BUF_PART_1 && i_m <= BUF_PART_2){
+			// Blink statusLed2
+			digitalWrite(statusLedPin1, HIGH);
+			digitalWrite(soundModeIndicator, HIGH);
+		}
+		else if (i_m > BUF_PART_2 && i_m <= BUF_SIZE){
+			// Blink statusLed3
+			digitalWrite(statusLedPin1, HIGH);
+			digitalWrite(soundModeIndicator, HIGH);
+			digitalWrite(videoModeIndicator, HIGH);
+		}
 		if (i_m >= BUF_SIZE){
 			i_m = 0;
     		measured_delay_flag = 1; // Save measurements in SD card

@@ -28,6 +28,20 @@ void signalGeneratorLEDOn()
 void signalGeneratorLEDOff()
 {
 	digitalWrite(ledPin, LOW);
+
+	uint8_t num_measurements = getNumMeasurementsCompleted();
+	if (num_measurements > 0 && num_measurements < BUF_PART_1){
+			// Blink statusLed1
+			digitalWrite(statusLedPin1, LOW);
+		}
+		else if (num_measurements > BUF_PART_1 && num_measurements < BUF_PART_2){
+			// Blink statusLed2
+			digitalWrite(soundModeIndicator, LOW);
+		}
+		else if (num_measurements > BUF_PART_2 && num_measurements < BUF_SIZE){
+			// Blink statusLed3
+			digitalWrite(videoModeIndicator, LOW);
+		}
 }
 
 void signalGeneratorSpeakerOn()
