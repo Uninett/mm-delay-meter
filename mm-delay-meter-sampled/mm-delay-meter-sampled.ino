@@ -3,19 +3,15 @@
 #include "src/timer3.h"
 #include "src/signal_generator.h"
 #include "src/measurement_samples.h"
-#include "src/sd_card_datalogger.h"
+#include "src/datalogger.h"
 #include "src/wifi.h"
-#include "src/logger.h"
 #include "src/ui.h"
 #include <Process.h>
 
-volatile bool           mode_button       = false;
-volatile bool           prev_mode_button  = false;
 volatile bool           start_new_series  = false;
-volatile bool           mode_change_flag  = false;
 volatile bool           running           = false;
 volatile uint8_t mode = VIDEO_MODE;
-uint8_t wifi_attempts = 0;
+//uint8_t wifi_attempts = 0;
 bool    time_status   = false;   // true if the unit has been connected to wifi since power-up
 volatile bool    mode_changed  = false;
 volatile bool    mode_stopped  = false;
@@ -38,7 +34,7 @@ void setup() {
   while(!Serial);
 
   /* Bridge startup */
-  Serial.println("Bridge...");
+  Serial.println(F("Bridge..."));
   Bridge.begin();
   digitalWrite(LED_BUILTIN, HIGH);
 
@@ -186,7 +182,7 @@ void loop() {
   if (measurementSamplesCheckMeasuredFlag()){
     clearMeasuredFlag();
     // A full measurement series is complete
-    Serial.println("Measurement series finished.");
+    Serial.println(F("Measurement series finished."));
     stopMeasurement();
     
     char mode_char;
@@ -199,7 +195,7 @@ void loop() {
     /* Check WiFi connection */
     if (!wifiStatus(p)){
       /* Not connected. Try again */
-      Serial.println("WiFi not connected. Trying to reconnect...");
+      Serial.println(F("WiFi not connected. Trying to reconnect..."));
       wifiConnect(p);      
     }
     
@@ -215,7 +211,7 @@ void loop() {
         char c = p.read();
         date += c;
       }
-      Serial.println("Connected to WiFi. Uploading to database...");
+      Serial.println(F("Connected to WiFi. Uploading to database..."));
 //      String mac;
 //      getMACAddress(mac, p);
 //      for (int nr = 0; nr < filenr; nr++){
@@ -241,7 +237,7 @@ void loop() {
       
     }
     else{
-      Serial.println("WiFi still not connected. Try again later.");
+      Serial.println(F("WiFi still not connected. Try again later."));
     }
     setAllLEDs(mode);
   }
