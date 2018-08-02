@@ -5,3 +5,4 @@ void signalGeneratorLEDOn();
 void signalGeneratorLEDOff();
 void signalGeneratorSpeakerOn();
 void signalGeneratorSpeakerOff();
+void signalGeneratorStatusLEDControl();

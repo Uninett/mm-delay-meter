@@ -139,16 +139,13 @@ void loop() {
   }
   
   if (timer1CheckFlag(OVF)){
-    signalGeneratorLEDOn();
-    if (mode == SOUND_MODE){
-      signalGeneratorSpeakerOn();
-    }
+    if      (mode == VIDEO_MODE) signalGeneratorLEDOn();
+    else if (mode == SOUND_MODE) signalGeneratorSpeakerOn();
   }
   if (timer1CheckFlag(COMP)){
-    signalGeneratorLEDOff();
-    if (mode == SOUND_MODE){
-      signalGeneratorSpeakerOff();
-    }
+    if      (mode == VIDEO_MODE) signalGeneratorLEDOff();
+    else if (mode == SOUND_MODE) signalGeneratorSpeakerOff();
+    signalGeneratorStatusLEDControl();
   }
   if (timer3CheckSamplingFlag()){
     bool first_edge = measurementSamplesRisingEdgeDetection(mode, start_new_series);
@@ -325,6 +322,7 @@ void stopMeasurement()
   pauseTimer3();
   signalGeneratorLEDOff();
   signalGeneratorSpeakerOff();
+  signalGeneratorStatusLEDControl();
 }
 
 
