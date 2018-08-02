@@ -199,16 +199,16 @@ void loop() {
     if (wifiStatus(p)){
       /* Connected. Upload to database */
       time_status = true;
-      // Does it sync automatically or do I need to attempt to get date?
-      p.begin("date");
-      p.addParameter("+%F %H:%M:%S");
-      p.run();
-      date = "";
-      while(p.available() > 0) {
-        char c = p.read();
-        date += c;
-      }
       Serial.println(F("Connected to WiFi. Uploading to database..."));
+      
+      String upload_status = "";
+      p.runShellCommand(F("/mnt/sda1/arduino/upload.sh"));
+      while (p.running());
+      while (p.available() > 0){
+          char c = p.read();
+          upload_status += c;
+      }
+      Serial.println(upload_status);
 //      String mac;
 //      getMACAddress(mac, p);
 //      for (int nr = 0; nr < filenr; nr++){
