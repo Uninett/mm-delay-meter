@@ -5,18 +5,24 @@
 #include "timer3.h"
 #include "timer1.h"
 #include "config.h"
-#include "avdweb_analogReadFast.h"
 
 bool light_recieved_at_sensor_flag;
 bool sound_recieved_at_mic_flag;
 bool measured_delay_flag;
-unsigned short delta;
 unsigned long deltaMicros;
-int idle_mic_val;
-int idle_ltv_val;
-uint8_t i_m;
+int16_t idle_mic_val;
+int16_t idle_ltv_val;
 
+/* Maximum smoothing filter */
 int16_t samples[NUM_SAMPLES];
+uint8_t current_index;
+uint16_t max_sample;
+uint8_t max_sample_index;
+
+/* Rising edge detection */
+uint8_t i_m;
+int16_t current_max;
+unsigned long deltaMicrosSaved[BUF_SIZE];
 
 void measurementSamplesSetup(uint8_t mode)
 {
@@ -48,6 +54,7 @@ void measurementSamplesSetMode(uint8_t mode)
     timer3ClearSamplingFlag();
 
 	if (mode == VIDEO_MODE){
+		/* Change ADC's Vref to default 5V */
 		analogReference(DEFAULT);
 		int dummyRead;
 		for (int i = 0; i < 100; i++){
@@ -82,13 +89,11 @@ void measurementSamplesSetMode(uint8_t mode)
     // Calibrate microphone measurements
 	if(mode == SOUND_MODE){
 		/* Change ADC's Vref to internal 2.56V */
-		//Serial.println("ADC setup");
 		analogReference(INTERNAL);
 		int dummyRead;
 		for (int i = 0; i < 100; i++){
 			dummyRead = analogRead(A1);
 		}
-
 
 		Serial.println("Calibrating mic...");
 		int current_mic = analogRead(microphonePin);
@@ -119,20 +124,11 @@ void measurementSamplesSetMode(uint8_t mode)
 
 bool measurementSamplesCheckMeasuredFlag()
 {
-	if (measured_delay_flag){ 
-    	//measured_delay_flag = 0;
-    	return true;
- 	}
- 	else{
-    	return false;
- 	}
+	return measured_delay_flag;
 }
 
 
 /* Maximum smoothing filter */
-uint8_t current_index;
-uint16_t max_sample;
-uint8_t max_sample_index;
 
 void measurementSamplesInitialize(uint8_t mode)
 {
@@ -146,7 +142,7 @@ void measurementSamplesInitialize(uint8_t mode)
 
 int16_t measurementSamplesMaxSmoothingFilter()
 {
-	int16_t raw_sample = analogReadFast(lightSensorPin);
+	int16_t raw_sample = analogRead(lightSensorPin);
 
 	// Add sample to saved samples
 	samples[current_index] = raw_sample;
@@ -175,29 +171,70 @@ int16_t measurementSamplesMaxSmoothingFilter()
 
 
 /* Rising edge detection */
-int16_t current_max;
-bool edge_detected;
-unsigned long deltaMicrosSaved[BUF_SIZE];
 
+void measurementSamplesRisingEdgeDetectionVideo(bool &edge_detected, bool start_new_series)
+{
+	current_max = measurementSamplesMaxSmoothingFilter();
+	edge_detected = false;
 
+	static uint8_t acc_pos_slopes;
+	static int16_t prev_max = current_max;
+	if (start_new_series){
+		acc_pos_slopes = 0;
+		prev_max = current_max;
+	}
+
+	if (!light_recieved_at_sensor_flag){
+		if (current_max - prev_max > 10) edge_detected = true;
+		else{
+			if (current_max > prev_max){
+				acc_pos_slopes++;
+			} 
+			else acc_pos_slopes = 0;
+			if (acc_pos_slopes >= 5) edge_detected = true;
+		}
+		
+    	if (edge_detected) acc_pos_slopes = 0;
+	}
+	prev_max = current_max;
+}
+
+void measurementSamplesRisingEdgeDetectionSound(bool &edge_detected, bool start_new_series)
+{
+	static uint8_t num_pos_measures;
+	if (start_new_series){
+		num_pos_measures = 0;
+	}
+	current_max = analogRead(microphonePin);
+	edge_detected = false;
+
+	if (!sound_recieved_at_mic_flag){
+		if (current_max - idle_mic_val > 5) edge_detected = true; 
+		else{
+			if (current_max > idle_mic_val+1){
+				num_pos_measures++;
+			} 
+			else num_pos_measures = 0;
+			if (num_pos_measures >= 2) edge_detected = true; 
+		}
+
+    	if (edge_detected) num_pos_measures = 0; 
+	}
+}
 
 bool measurementSamplesRisingEdgeDetection(uint8_t mode, bool start_new_series)
 {
 	// Get timestamp as early as possible
-	delta = readTimer1();
-
-	/*TEST*/
-	//digitalWrite(testFreqPin, digitalRead(testFreqPin)^1);
-	//Writing a logic one to PINxn toggles the value of PORTxn, digital pin 6 is PD7
-	//PIND = 0x80;
+	unsigned short delta = readTimer1();
+	bool edge_detected = false;
 
 	switch (mode)
 	{
 		case VIDEO_MODE:
-			edge_detected = measurementSamplesRisingEdgeDetectionVideo(start_new_series);
+			measurementSamplesRisingEdgeDetectionVideo(edge_detected, start_new_series);
 			break;
 		case SOUND_MODE:
-			edge_detected = measurementSamplesRisingEdgeDetectionSound(start_new_series);
+			measurementSamplesRisingEdgeDetectionSound(edge_detected, start_new_series);
 			break;
 	}
 
@@ -256,58 +293,6 @@ void setMeasuredFlag()
 void clearMeasuredFlag()
 {
 	measured_delay_flag = 0;
-}
-
-bool measurementSamplesRisingEdgeDetectionVideo(bool start_new_series)
-{
-	current_max = measurementSamplesMaxSmoothingFilter();
-	edge_detected = false;
-
-	static int16_t acc_pos_slopes;
-	static int16_t prev_max = current_max;
-	if (start_new_series){
-		acc_pos_slopes = 0;
-		prev_max = current_max;
-	}
-
-	if (!light_recieved_at_sensor_flag){
-		if (current_max - prev_max > 10) edge_detected = true;
-		else{
-			if (current_max > prev_max){
-				acc_pos_slopes++;
-			} 
-			else acc_pos_slopes = 0;
-			if (acc_pos_slopes >= 5) edge_detected = true;
-		}
-		
-    	if (edge_detected) acc_pos_slopes = 0;
-	}
-	prev_max = current_max;
-	return edge_detected;
-}
-
-bool measurementSamplesRisingEdgeDetectionSound(bool start_new_series)
-{
-	static int16_t num_pos_measures;
-	if (start_new_series){
-		num_pos_measures = 0;
-	}
-	current_max = analogReadFast(microphonePin);
-	edge_detected = false;
-
-	if (!sound_recieved_at_mic_flag){
-		if (current_max - idle_mic_val > 5) edge_detected = true; 
-		else{
-			if (current_max > idle_mic_val+1){
-				num_pos_measures++;
-			} 
-			else num_pos_measures = 0;
-			if (num_pos_measures >= 2) edge_detected = true; 
-		}
-
-    	if (edge_detected) num_pos_measures = 0; 
-	}
-	return edge_detected;
 }
 
 
