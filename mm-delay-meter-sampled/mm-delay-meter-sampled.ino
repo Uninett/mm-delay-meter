@@ -19,7 +19,9 @@ uint8_t wifi_attempts = 0;
 bool    time_status   = false;   // true if the unit has been connected to wifi since power-up
 volatile bool    mode_changed  = false;
 volatile bool    mode_stopped  = false;
-String  networkId     = "UNINETT_guest";
+volatile bool    start_measurements = false;
+volatile bool    stop_measurements  = false;
+//String  networkId     = "UNINETT_guest";
 String  date;
 String  start_time;
 bool first_edge;
@@ -132,6 +134,12 @@ void loop() {
   if (start_measurements){
     startMeasurement();
     start_measurements = false;
+  }
+
+  if (stop_measurements){
+    stopMeasurement();
+    stop_measurements = false;
+    setAllLEDs(mode);
   }
   
   if (timer1CheckFlag(OVF)){
@@ -256,15 +264,12 @@ ISR(INT0_vect)
   }
   /* STOP */
   else if (running){
-    stopMeasurement();
     // Save if something can be saved
     if (getNumMeasurementsCompleted() > 0){
       setMeasuredFlag();
-      Serial.print("Num measurements: ");
-      Serial.println(getNumMeasurementsCompleted());
     }
     else{
-      setAllLEDs(mode);
+      stop_measurements = true;
     }
   }
 }
@@ -287,18 +292,15 @@ ISR(INT1_vect)
         mode = VIDEO_MODE; 
       }
       if (running){
-        stopMeasurement();
         // Save if something can be saved
         if (getNumMeasurementsCompleted() > 0){
-          Serial.print("Num measurements: ");
-          Serial.println(getNumMeasurementsCompleted());
           setMeasuredFlag();
           mode_stopped = true;
         }
         else{
+          stop_measurements = true;
           clearMeasuredFlag();
           mode_stopped = false;
-          setAllLEDs(mode);
         }
       }
       mode_changed = true;
