@@ -1,8 +1,8 @@
-/* SD card datalogger */
+/* Datalogger: save to SD card, and print to log file */
 
 #include <FileIO.h>
 #include <Process.h>
-#include "sd_card_datalogger.h"
+#include "datalogger.h"
 #include "measurement_samples.h"
 
 // delete files: rm -rf /mnt/sda1/arduino/delay/*
@@ -26,16 +26,16 @@ void SDCardGenerateNewFile(String &name, char mode)
 }
 
 
-String SDCardLogger(String start_time, String date, uint8_t measurements, char mode) {
+String SDCardSaveData(String start_time, String date, uint8_t measurements, char mode) {
     // open the file. note that only one file can be open at a time,
     // so you have to close this one before opening another.
     String filename = "";
     SDCardGenerateNewFile(filename, mode);
-    Serial.print("File name: ");
+    Serial.print(F("File name: "));
     Serial.println(filename);
     File dataFile = FileSystem.open(filename.c_str(), FILE_APPEND);
 
-    Serial.println("SD card logging...");
+    Serial.println(F("SD card logging..."));
     String data_string = "";
     String delayMillis;
     String time_string = "";
@@ -105,4 +105,34 @@ String SDCardLogger(String start_time, String date, uint8_t measurements, char m
 	clearMeasuredFlag();
 
     return filename;
+}
+
+
+Logger::Logger()
+{
+    log_file = "/mnt/sd/arduino/log.txt";
+}
+
+Logger::begin()
+{
+    FileSystem.begin();
+    FileSystem.remove(log_file);
+}
+
+Logger::print(String input)
+{
+    File data_file = FileSystem.open(log_file, FILE_APPEND);
+    if (data_file) {
+        data_file.print(input);
+        data_file.close();
+    }
+}
+
+Logger::println(String input)
+{
+    File data_file = FileSystem.open(log_file, FILE_APPEND);
+    if (data_file) {
+        data_file.println(input);
+        data_file.close();
+    }
 }

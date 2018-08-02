@@ -186,7 +186,7 @@ void loop() {
     else{              mode_char = (mode == VIDEO_MODE) ? 'V' : 'A'; }
     mode_stopped = false;
     
-    String file = SDCardLogger(start_time, date, getNumMeasurementsCompleted(), mode_char);
+    String file = SDCardSaveData(start_time, date, getNumMeasurementsCompleted(), mode_char);
     
     /* Check WiFi connection */
     if (!wifiStatus(p)){
