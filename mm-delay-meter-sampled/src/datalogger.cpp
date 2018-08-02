@@ -33,11 +33,10 @@ String SDCardSaveData(String start_time, String date, uint8_t measurements, char
     SDCardGenerateNewFile(filename, mode);
     Serial.print(F("File name: "));
     Serial.println(filename);
-    File dataFile = FileSystem.open(filename.c_str(), FILE_APPEND);
+    File data_file = FileSystem.open(filename.c_str(), FILE_APPEND);
 
     Serial.println(F("SD card logging..."));
     String data_string = "";
-    String delayMillis;
     String time_string = "";
     int hour = 0; 
     int minute = 0;
@@ -76,24 +75,23 @@ String SDCardSaveData(String start_time, String date, uint8_t measurements, char
 	    	}
     	}
 
-    	delayMillis =  measurementSamplesGetSavedSample(i);
     	data_string += String(i);
     	data_string += ",";
     	data_string += date;
     	data_string += ",";
     	data_string += time_string;
     	data_string += ",";
-    	data_string += delayMillis;
+    	data_string += measurementSamplesGetSavedSample(i);
     	if ( i < max - 1 ){
     		data_string += "\n";
     	}
     }
 
     // if the file is available, write to it:
-    if (dataFile) {
+    if (data_file) {
     	Serial.println(data_string);
-        dataFile.println(data_string);
-        dataFile.close();
+        data_file.println(data_string);
+        data_file.close();
     }
     // if the file isn't open, pop up an error:
     else {
