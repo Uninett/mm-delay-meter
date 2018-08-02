@@ -303,7 +303,7 @@ ISR(INT1_vect)
   lastButtonState = buttonState;
 }
 
-void startMeasurement()
+static void startMeasurement()
 {
   running = true;
   start_new_series = true;
@@ -315,7 +315,7 @@ void startMeasurement()
   digitalWrite(soundModeIndicator, LOW);
   digitalWrite(videoModeIndicator, LOW);
 }
-void stopMeasurement()
+static void stopMeasurement()
 {
   running = false;
   pauseTimer1();

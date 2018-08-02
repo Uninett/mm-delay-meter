@@ -172,7 +172,7 @@ int16_t measurementSamplesMaxSmoothingFilter()
 
 /* Rising edge detection */
 
-void measurementSamplesRisingEdgeDetectionVideo(bool &edge_detected, bool start_new_series)
+static void measurementSamplesRisingEdgeDetectionVideo(bool &edge_detected, bool start_new_series)
 {
 	current_max = measurementSamplesMaxSmoothingFilter();
 	edge_detected = false;
@@ -199,7 +199,7 @@ void measurementSamplesRisingEdgeDetectionVideo(bool &edge_detected, bool start_
 	prev_max = current_max;
 }
 
-void measurementSamplesRisingEdgeDetectionSound(bool &edge_detected, bool start_new_series)
+static void measurementSamplesRisingEdgeDetectionSound(bool &edge_detected, bool start_new_series)
 {
 	static uint8_t num_pos_measures;
 	if (start_new_series){

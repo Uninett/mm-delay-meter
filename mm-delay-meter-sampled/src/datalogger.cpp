@@ -12,7 +12,7 @@ void SDCardSetup() {
     FileSystem.begin();
 }
 
-void SDCardGenerateNewFile(String &name, char mode)
+static void SDCardGenerateNewFile(String &name, char mode)
 {	
 	// Create new file with unique name in /mnt/sda1/arduino/delay directory
 	Process f;
@@ -35,7 +35,6 @@ String SDCardSaveData(String start_time, String date, uint8_t measurements, char
     Serial.println(filename);
     File data_file = FileSystem.open(filename.c_str(), FILE_APPEND);
 
-    Serial.println(F("SD card logging..."));
     String data_string = "";
     String time_string = "";
     int hour = 0; 
