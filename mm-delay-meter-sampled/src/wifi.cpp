@@ -122,6 +122,23 @@ void upload(Process p)
     Serial.println(result); 
 }
 
+bool getDateStatus(Process p)
+{
+    result = "";
+    p.runShellCommand(F("cat /mnt/sda1/arduino/date_ok.txt"));
+    while (p.available() > 0){
+        char c = p.read();
+        result += c;
+    }
+    result.trim();
+    if (result == "0"){
+        return false;
+    }
+    else{
+        return true;
+    }
+}
+
 void wifiStartup(Process p)
 {
     result = "";

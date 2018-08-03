@@ -96,6 +96,7 @@ void setup() {
   Serial.println(date);
 
   wifiStartup(p); // Connects wifi, and uploads files to database if wifi connected and any files available
+  if (getDateStatus(p)){
     time_status = true;
   }
   p.begin("date");
@@ -153,7 +154,11 @@ void loop() {
     if (start_new_series) start_new_series = false;
     if (first_edge){
       // Get start time
-      if (time_status){
+      if (!time_status){
+        time_status = getDateStatus(p);
+      }
+      if(time_status){
+        time_status = true;
         p.begin("date");
         p.addParameter("+%F");
         p.run();

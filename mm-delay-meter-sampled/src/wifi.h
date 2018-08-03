@@ -6,5 +6,6 @@
 void wifiConnect(Process p);
 bool wifiStatus(Process p);
 void upload(Process p);
+bool getDateStatus(Process p);
 void wifiStartup(Process p);
 void wifiStatusAndConnectAndUpload(Process p);
