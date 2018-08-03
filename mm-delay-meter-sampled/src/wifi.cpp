@@ -79,32 +79,69 @@
 //     }
 // }
 
-String wifi = "";
+String result = "";
 
 void wifiConnect(Process p)
 {
-    wifi = "";
-    p.runShellCommand("/mnt/sda1/arduino/wifi_connect.sh");
+    result = "";
+    p.runShellCommand(F("/mnt/sda1/arduino/wifi_connect.sh"));
+    while (p.running());
     while (p.available() > 0){
         char c = p.read();
-        wifi += c;
+        result += c;
     }
-    Serial.println(wifi);
+    Serial.println(result);
 }
 
 bool wifiStatus(Process p)
 {
-    wifi = "";
-    p.runShellCommand("/mnt/sda1/arduino/wifi_status.sh");
+    result = "";
+    p.runShellCommand(F("/mnt/sda1/arduino/wifi_status.sh"));
     while (p.available() > 0){
         char c = p.read();
-        wifi += c;
+        result += c;
     }
-    wifi.trim();
-    if (wifi == "0"){
+    result.trim();
+    if (result == "0"){
         return false;
     }
     else{
         return true;
     }
+}
+
+void upload(Process p)
+{
+    result = "";
+    p.runShellCommand(F("/mnt/sda1/arduino/upload.sh"));
+    while (p.running());
+    while (p.available() > 0){
+      char c = p.read();
+      result += c;
+    }
+    Serial.println(result); 
+}
+
+void wifiStartup(Process p)
+{
+    result = "";
+    p.runShellCommand(F("/mnt/sda1/arduino/startup.sh"));
+    while (p.running());
+    while (p.available() > 0){
+      char c = p.read();
+      result += c;
+    }
+    Serial.println(result); 
+}
+
+void wifiStatusAndConnectAndUpload(Process p)
+{
+    result = "";
+    p.runShellCommand(F("/mnt/sda1/arduino/periodic_wifi_func.sh"));
+    while (p.running());
+    while (p.available() > 0){
+      char c = p.read();
+      result += c;
+    }
+    Serial.println(result); 
 }

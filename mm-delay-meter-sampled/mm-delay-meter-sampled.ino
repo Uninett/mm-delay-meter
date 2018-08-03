@@ -41,16 +41,7 @@ void setup() {
   /* Log */
   Log.begin();
 
-  /* WiFi */
-  p.begin("date");
-  p.addParameter("+%F %H:%M:%S");
-  p.run();
-  date = "";
-  while(p.available() > 0) {
-    char c = p.read();
-    date += c;
-  }
-  Serial.println(date);
+
   
 //  wifiConfig("Arduino", "uninett", networkId, "", "YUNArduinoAP", "NO", "none");
 //  if(!wifiStatus2()){
@@ -93,8 +84,18 @@ void setup() {
 //    delay(2000);
 //  }
 
-  wifiConnect(p);
-  if (wifiStatus(p)){
+  /* WiFi */
+  p.begin("date");
+  p.addParameter("+%F %H:%M:%S");
+  p.run();
+  date = "";
+  while(p.available() > 0) {
+    char c = p.read();
+    date += c;
+  }
+  Serial.println(date);
+
+  wifiStartup(p); // Connects wifi, and uploads files to database if wifi connected and any files available
     time_status = true;
   }
   p.begin("date");
@@ -188,54 +189,24 @@ void loop() {
     mode_stopped = false;
     
     String file = SDCardSaveData(start_time, date, getNumMeasurementsCompleted(), mode_char);
-    
-    /* Check WiFi connection */
-    if (!wifiStatus(p)){
-      /* Not connected. Try again */
-      Serial.println(F("WiFi not connected. Trying to reconnect..."));
-      wifiConnect(p);      
-    }
-    
-    if (wifiStatus(p)){
-      /* Connected. Upload to database */
-      time_status = true;
-      Serial.println(F("Connected to WiFi. Uploading to database..."));
-      
-      String upload_status = "";
-      p.runShellCommand(F("/mnt/sda1/arduino/upload.sh"));
-      while (p.running());
-      while (p.available() > 0){
-          char c = p.read();
-          upload_status += c;
-      }
-      Serial.println(upload_status);
-//      String mac;
-//      getMACAddress(mac, p);
-//      for (int nr = 0; nr < filenr; nr++){
-//        //p.runShellCommand("curl --data \"nokkel=" + mac + "\" --data-urlencode seriedata@" + filenames[nr] + " http://delay.uninett.no/fmaling/dbm.php");
-//        //while(p.running());
-//        String data = "";
-//        int i = 0;
-//        while(p.available() > 0){
-//          char c = p.read();
-//          data += c;
-//          if (i > 0 && c != "[" && c != "]"){
-//            // Successful upload
-//            Serial.println("Uploaded file " + filenames[nr]);
-//            //p.runShellCommand("rm /mnt/sd/arduino/delay/" + filenames[nr]);
-//            break;
-//          }
-//          i++;
-//        }
-//        filenames[nr] = "";
-//        Serial.println(data);
-//      }
-//      filenr = 0; // Assumed all uploads were successful
-      
-    }
-    else{
-      Serial.println(F("WiFi still not connected. Try again later."));
-    }
+
+    wifiStatusAndConnectAndUpload(p); // Checks WiFi, connects and uploads files if possible
+//    /* Check WiFi connection */
+//    if (!wifiStatus(p)){
+//      /* Not connected. Try again */
+//      Serial.println(F("WiFi not connected. Trying to reconnect..."));
+//      wifiConnect(p);      
+//    }
+//    
+//    if (wifiStatus(p)){
+//      /* Connected. Upload to database */
+//      time_status = true;
+//      Serial.println(F("Connected to WiFi. Uploading to database..."));
+//      upload(p);    
+//    }
+//    else{
+//      Serial.println(F("WiFi still not connected. Try again later."));
+//    }
     setAllLEDs(mode);
   }
 
