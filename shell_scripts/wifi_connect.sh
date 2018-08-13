@@ -8,7 +8,6 @@ IP_STATUS=0
 
 wifi_status() {
 	SIGNAL=$(/usr/bin/pretty-wifi-info.lua | grep "Signal" | cut -f2 -d" " | cut -f1 -d"%")
-	#echo "Signal: " $SIGNAL
 	if [ "$SIGNAL" != "0" -a -n "$SIGNAL" ]
 	then
 		IP=$(/usr/bin/pretty-wifi-info.lua | grep "IP address" | cut -f2 -d":" | cut -f1 -d"/")
@@ -71,6 +70,7 @@ then
 		if [ "$ATTEMPTS" -ge "10" ]
 		then
 			echo "Unable to connect to WiFi."
+			echo $(date "+%F %H:%M:%S:") "Unable to connect to WiFi." >> /mnt/sda1/arduino/log.txt
 			ATTEMPTS=0
 			break
 		fi
@@ -87,14 +87,15 @@ then
 		if [ "$IP_status" = 1 ]
 		then
 			echo "Connected to " $SSID". IP: " $IP
+			echo $(date "+%F %H:%M:%S:") "Connected to" $SSID". IP:" $IP >> /mnt/sda1/arduino/log.txt
 			break
-		else
-			echo "Connected to " $SSID". No IP yet."
 		fi
 	done
 	if [ "$IP_STATUS" = "1" ]
 	then
 		echo "Connected to " $SSID". IP: " $IP
+		echo $(date "+%F %H:%M:%S:") "Connected to" $SSID". IP:" $IP >> /mnt/sda1/arduino/log.txt
+
 	fi
 	
 fi

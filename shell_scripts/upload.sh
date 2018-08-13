@@ -26,11 +26,15 @@ for file in /mnt/sda1/arduino/delay/A_NU.*; do
 	if [ "$SUBSTRING" = "Insert succeeded" -a "$CURL_RETURN_CODE" = "0" ]
 	then
 		echo "Success!"
+		echo $(date "+%F %H:%M:%S:") "Successfully inserted" $file "to database" >> /mnt/sda1/arduino/log.txt
+
 		new_file=${file/_NU/_U}
 		mv $file $new_file	# Rename to indicate the series was uploaded
 		touch $new_file		# Update last-modified date
 	else
 		echo "Insert failed."
+		echo $(date "+%F %H:%M:%S:") "Failed to insert" $file "to database" >> /mnt/sda1/arduino/log.txt
+
 	fi
 done
 
@@ -50,10 +54,12 @@ for file in /mnt/sda1/arduino/delay/V_NU.*; do
 	if [ "$SUBSTRING" = "Insert succeeded" -a "$CURL_RETURN_CODE" = "0" ]
 	then
 		echo "Success!"
+		echo $(date "+%F %H:%M:%S:") "Successfully inserted" $file "to database" >> /mnt/sda1/arduino/log.txt
 		new_file=${file/_NU/_U}
 		mv $file $new_file	# Rename to indicate the series was uploaded
 		touch $new_file		# Update last-modified date
 	else
 		echo "Upload failed."
+		echo $(date "+%F %H:%M:%S:") "Failed to insert" $file "to database" >> /mnt/sda1/arduino/log.txt
 	fi
 done

@@ -113,7 +113,8 @@ void setup() {
   signalGeneratorSetup();
   measurementSamplesSetup(mode);
   uiSetup();
-  
+
+  Log.println(F("Ready"));
   interrupts();
 }
 
@@ -179,7 +180,7 @@ void loop() {
   if (measurementSamplesCheckMeasuredFlag()){
     clearMeasuredFlag();
     // A full measurement series is complete
-    Serial.println(F("Measurement series finished."));
+    Log.println(F("Measurement series finished."));
     stopMeasurement();
     
     char mode_char;

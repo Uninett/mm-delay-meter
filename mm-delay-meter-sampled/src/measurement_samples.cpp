@@ -61,6 +61,7 @@ void measurementSamplesSetMode(uint8_t mode)
 			dummyRead = analogRead(A0);
 		}
     	Serial.println("Calibrating l-t-v sensor...");
+    	Log.println(F("Set VIDEO mode"));
 		int current_ltv = analogRead(lightSensorPin);
 		int prev_ltv = current_ltv;
 		int mean = 0;
@@ -96,6 +97,7 @@ void measurementSamplesSetMode(uint8_t mode)
 		}
 
 		Serial.println("Calibrating mic...");
+		Log.println(F("Set AUDIO mode"));
 		int current_mic = analogRead(microphonePin);
 		int prev_mic = current_mic;
 		int mean = 0;

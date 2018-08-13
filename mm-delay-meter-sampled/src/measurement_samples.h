@@ -2,6 +2,7 @@
 
 #include <inttypes.h>
 #include "Arduino.h"
+#include "datalogger.h"
 
 #define BUF_SIZE		6
 #define BUF_PART_1		2
@@ -27,3 +28,4 @@ void resetSavedMeasurements();
 void setMeasuredFlag();
 void clearMeasuredFlag();
 
+extern Logger Log;

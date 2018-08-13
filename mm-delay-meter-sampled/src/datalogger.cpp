@@ -1,7 +1,6 @@
 /* Datalogger: save to SD card, and print to log file */
 
 #include <FileIO.h>
-#include <Process.h>
 #include "datalogger.h"
 #include "measurement_samples.h"
 
@@ -33,6 +32,7 @@ String SDCardSaveData(String start_time, String date, uint8_t measurements, char
     SDCardGenerateNewFile(filename, mode);
     Serial.print(F("File name: "));
     Serial.println(filename);
+    Log.println("Open file " + filename);
     File data_file = FileSystem.open(filename.c_str(), FILE_APPEND);
 
     String data_string = "";
@@ -91,10 +91,12 @@ String SDCardSaveData(String start_time, String date, uint8_t measurements, char
     	Serial.println(data_string);
         data_file.println(data_string);
         data_file.close();
+        Log.println("Write to file " + filename);
     }
     // if the file isn't open, pop up an error:
     else {
         Serial.println("error opening " + filename);
+        Log.println("Error opening " + filename);
     }
     // Reset to default values, ready for new measurements
     resetNumMeasurementsCompleted();
@@ -127,8 +129,19 @@ Logger::print(String input)
 
 Logger::println(String input)
 {
+    p.begin("date");
+    p.addParameter("+%F %H:%M:%S");
+    p.run();
+    String date = "";
+    while(p.available() > 0) {
+        char c = p.read();
+        date += c;
+    }
+    date.trim();
+
     File data_file = FileSystem.open(log_file, FILE_APPEND);
     if (data_file) {
+        data_file.print(date + ": ");
         data_file.println(input);
         data_file.close();
     }
