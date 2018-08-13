@@ -12,7 +12,7 @@ volatile bool           start_new_series  = false;
 volatile bool           running           = false;
 volatile uint8_t mode = VIDEO_MODE;
 //uint8_t wifi_attempts = 0;
-bool    time_status   = false;   // true if the unit has been connected to wifi since power-up
+//bool    time_status   = false;   // true if the unit has been connected to wifi since power-up
 volatile bool    mode_changed  = false;
 volatile bool    mode_stopped  = false;
 volatile bool    start_measurements = false;
@@ -96,9 +96,7 @@ void setup() {
   Serial.println(date);
 
   wifiStartup(p); // Connects wifi, and uploads files to database if wifi connected and any files available
-  if (getDateStatus(p)){
-    time_status = true;
-  }
+
   p.begin("date");
   p.addParameter("+%F %H:%M:%S");
   p.run();
@@ -154,11 +152,7 @@ void loop() {
     if (start_new_series) start_new_series = false;
     if (first_edge){
       // Get start time
-      if (!time_status){
-        time_status = getDateStatus(p);
-      }
-      if(time_status){
-        time_status = true;
+      if(getDateStatus(p)){
         p.begin("date");
         p.addParameter("+%F");
         p.run();
