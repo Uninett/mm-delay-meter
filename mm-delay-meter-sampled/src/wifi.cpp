@@ -144,11 +144,11 @@ void wifiStartup(Process p)
     result = "";
     p.runShellCommand(F("/mnt/sda1/arduino/startup.sh"));
     while (p.running());
-    while (p.available() > 0){
-      char c = p.read();
-      result += c;
-    }
-    Serial.println(result); 
+    // while (p.available() > 0){
+    //   char c = p.read();
+    //   result += c;
+    // }
+    // Serial.println(result); 
 }
 
 void wifiStatusAndConnectAndUpload(Process p)
@@ -156,9 +156,9 @@ void wifiStatusAndConnectAndUpload(Process p)
     result = "";
     p.runShellCommand(F("/mnt/sda1/arduino/periodic_wifi_func.sh"));
     while (p.running());
-    while (p.available() > 0){
-      char c = p.read();
-      result += c;
-    }
-    Serial.println(result); 
+    // while (p.available() > 0){
+    //   char c = p.read();
+    //   result += c;
+    // }
+    // Serial.println(result); 
 }

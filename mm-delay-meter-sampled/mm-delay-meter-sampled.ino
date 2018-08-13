@@ -22,12 +22,11 @@ String  date;
 String  start_time;
 bool first_edge;
 volatile unsigned long lastDebounceTime = 0;
-volatile unsigned long debounceDelay = 50; 
+volatile unsigned long debounceDelay    = 50; 
 volatile uint8_t lastButtonState = LOW;
-volatile uint8_t buttonState = LOW;
+volatile uint8_t buttonState     = LOW;
 Process p;
 Logger Log;
-
 
 void setup() {
   Serial.begin(9600);
@@ -85,28 +84,17 @@ void setup() {
 //  }
 
   /* WiFi */
-  p.begin("date");
-  p.addParameter("+%F %H:%M:%S");
-  p.run();
-  date = "";
-  while(p.available() > 0) {
-    char c = p.read();
-    date += c;
-  }
-  Serial.println(date);
-
   wifiStartup(p); // Connects wifi, and uploads files to database if wifi connected and any files available
 
-  p.begin("date");
-  p.addParameter("+%F %H:%M:%S");
-  p.run();
-  date = "";
-  while(p.available() > 0) {
-    char c = p.read();
-    date += c;
-  }
-  Serial.println(date);
-  Log.println(date);
+//  p.begin("date");
+//  p.addParameter("+%F %H:%M:%S");
+//  p.run();
+//  date = "";
+//  while(p.available() > 0) {
+//    char c = p.read();
+//    date += c;
+//  }
+//  Serial.println(date);
   
   /* SETUP */
   SDCardSetup();
@@ -191,27 +179,11 @@ void loop() {
     String file = SDCardSaveData(start_time, date, getNumMeasurementsCompleted(), mode_char);
 
     wifiStatusAndConnectAndUpload(p); // Checks WiFi, connects and uploads files if possible
-//    /* Check WiFi connection */
-//    if (!wifiStatus(p)){
-//      /* Not connected. Try again */
-//      Serial.println(F("WiFi not connected. Trying to reconnect..."));
-//      wifiConnect(p);      
-//    }
-//    
-//    if (wifiStatus(p)){
-//      /* Connected. Upload to database */
-//      time_status = true;
-//      Serial.println(F("Connected to WiFi. Uploading to database..."));
-//      upload(p);    
-//    }
-//    else{
-//      Serial.println(F("WiFi still not connected. Try again later."));
-//    }
     setAllLEDs(mode);
   }
 
   /* Reenable interrupts if enough time has passed since previous interrupt, 
-     and the button was released */
+     and the mode button was released */
   if (millis() - lastDebounceTime > debounceDelay){
     buttonState = ((PIND & (1 << PD1)) == (1 << PD1));
     if (buttonState == LOW){

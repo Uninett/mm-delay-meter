@@ -60,7 +60,7 @@ void measurementSamplesSetMode(uint8_t mode)
 		for (int i = 0; i < 100; i++){
 			dummyRead = analogRead(A0);
 		}
-    	Serial.println("Calibrating l-t-v sensor...");
+    	//Serial.println(F("Calibrating l-t-v sensor..."));
     	Log.println(F("Set VIDEO mode"));
 		int current_ltv = analogRead(lightSensorPin);
 		int prev_ltv = current_ltv;
@@ -96,7 +96,7 @@ void measurementSamplesSetMode(uint8_t mode)
 			dummyRead = analogRead(A1);
 		}
 
-		Serial.println("Calibrating mic...");
+		//Serial.println(F("Calibrating mic..."));
 		Log.println(F("Set AUDIO mode"));
 		int current_mic = analogRead(microphonePin);
 		int prev_mic = current_mic;
@@ -245,9 +245,9 @@ bool measurementSamplesRisingEdgeDetection(uint8_t mode, bool start_new_series)
 		if (mode == VIDEO_MODE) light_recieved_at_sensor_flag = 1;
 		if (mode == SOUND_MODE) sound_recieved_at_mic_flag = 1;
 
-		Serial.print(i_m);
-		Serial.print("\t");
-		Serial.println(deltaMicrosSaved[i_m-1]);
+		// Serial.print(i_m);
+		// Serial.print("\t");
+		// Serial.println(deltaMicrosSaved[i_m-1]);
 		if (i_m > 0 && i_m <= BUF_PART_1){
 			// Blink statusLed1
 			digitalWrite(statusLedPin1, HIGH);

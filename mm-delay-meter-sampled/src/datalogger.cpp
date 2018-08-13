@@ -30,8 +30,8 @@ String SDCardSaveData(String start_time, String date, uint8_t measurements, char
     // so you have to close this one before opening another.
     String filename = "";
     SDCardGenerateNewFile(filename, mode);
-    Serial.print(F("File name: "));
-    Serial.println(filename);
+    //Serial.print(F("File name: "));
+    //Serial.println(filename);
     Log.println("Open file " + filename);
     File data_file = FileSystem.open(filename.c_str(), FILE_APPEND);
 
@@ -88,14 +88,14 @@ String SDCardSaveData(String start_time, String date, uint8_t measurements, char
 
     // if the file is available, write to it:
     if (data_file) {
-    	Serial.println(data_string);
+    	//Serial.println(data_string);
         data_file.println(data_string);
         data_file.close();
         Log.println("Write to file " + filename);
     }
     // if the file isn't open, pop up an error:
     else {
-        Serial.println("error opening " + filename);
+        //Serial.println("Error opening " + filename);
         Log.println("Error opening " + filename);
     }
     // Reset to default values, ready for new measurements
