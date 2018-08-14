@@ -9,9 +9,9 @@
 #include "Arduino.h"
 #include "datalogger.h"
 
-#define BUF_SIZE		6
-#define BUF_PART_1		2
-#define BUF_PART_2		4
+#define BUF_SIZE		15
+#define BUF_PART_1		5
+#define BUF_PART_2		10
 
 
 void measurementSamplesSetup(uint8_t mode);

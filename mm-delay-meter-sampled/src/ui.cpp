@@ -2,6 +2,8 @@
 #include "config.h"
 
 void uiSetup()
+/* Set pin directions for LEDs and push button signals.
+ * Set initial LED signals. Configure external interrupts on button pins. */
 {
 	/* LEDs */
 	pinMode(statusLedPin1, OUTPUT);
@@ -28,6 +30,7 @@ void uiSetup()
 }
 
 void setModeLEDs(volatile uint8_t &mode)
+/* Set LEDs to indicate the current mode (video or sound) */
 {
 	if (mode == VIDEO_MODE){
 		digitalWrite(videoModeIndicator, HIGH);
@@ -40,6 +43,7 @@ void setModeLEDs(volatile uint8_t &mode)
 }
 
 void setAllLEDs(volatile uint8_t &mode)
+/* Set LEDs to indicate that the device is "idle": ready to start a new measurement series */
 {
 	digitalWrite(startIndicator, LOW);
 	setModeLEDs(mode);

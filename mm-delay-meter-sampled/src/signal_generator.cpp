@@ -4,6 +4,7 @@
 #include "config.h"
 
 void signalGeneratorSetup()
+/* Get signal generator ready: set pin directions, set up timer and clear flags */
 {
 	timer1ClearFlags();
 	startTimer1();
@@ -16,6 +17,7 @@ void signalGeneratorSetup()
 }
 
 void signalGeneratorLEDOn()
+/* Reset delay timer to zero and turn on LED */
 {	
 	measurementSamplesClearLightRecievedFlag();
 	resetTimer1();	
@@ -23,11 +25,13 @@ void signalGeneratorLEDOn()
 }
 
 void signalGeneratorLEDOff()
+/* Turn off LED */
 {
 	digitalWrite(ledPin, LOW);
 }
 
 void signalGeneratorStatusLEDControl()
+/* Control the three blinking LEDs that indicate how many measurements have been made */
 {
 	uint8_t num_measurements = getNumMeasurementsCompleted();
 	if (num_measurements > 0 && num_measurements < BUF_PART_1){
@@ -45,6 +49,7 @@ void signalGeneratorStatusLEDControl()
 }
 
 void signalGeneratorSpeakerOn()
+/* Reset delay timer to zero and turn on buzzer */
 {
 	measurementSamplesClearSoundRecievedFlag();
 	resetTimer1();
@@ -52,6 +57,7 @@ void signalGeneratorSpeakerOn()
 }
 
 void signalGeneratorSpeakerOff()
+/* Turn off buzzer */
 {
 	digitalWrite(buzzerPin, LOW);
 }
