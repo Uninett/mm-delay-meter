@@ -1,5 +1,3 @@
-/* Timer3 controls the measurement sample interval */
-
 #include "timer3.h"
 #include "config.h"
 
@@ -9,9 +7,6 @@ volatile bool timer3_sample_flag;
 
 // On 16 MHz Arduino boards, this function has a resolution of 4us
 void startTimer3(int mode) {
-	/*TEST*/
-	pinMode(testFreqPin, OUTPUT);
-
 	pauseTimer3();
 	TCCR3A = 0;
 	TCCR3C = 0;
@@ -26,12 +21,27 @@ void startTimer3(int mode) {
 	TIFR3 = 0;
 	// Enable compare match 3A interrupt
 	TIMSK3 = B00000010;
-	// Match at TCNT3 = 8: 32us
-	// Sampling frequency: 1/0.000032s = 31 250 Hz
-	if (mode == SOUND_MODE)	OCR3A = 7; 
-	if (mode == VIDEO_MODE) OCR3A = 10;
+	// Sound mode needs higher sampling frequency because 
+	// the voltage from the microphone oscillates with high frequency
+	if (mode == SOUND_MODE)	OCR3A = 7;  // f = 1/28us = 35 714 Hz
+	if (mode == VIDEO_MODE) OCR3A = 10; // f = 1/40us = 25 kHz
 	resumeTimer3();
 }
+
+void resetTimer3(void) {
+	// 17.3 Accessing 16-bit Registers (page 138)
+	uint8_t sreg;
+	// Save global interrupt flag
+	// 7.4.1 SREG – AVR Status Register (page 14)
+	sreg = SREG;
+	// Disable interrupts
+	cli();
+	// Write TCNTn
+	resetTimer3Unsafe();
+	// Restore global interrupt flag
+	SREG = sreg;
+}
+
 uint16_t readTimer3(void) {
 	// 17.3 Accessing 16-bit Registers (page 138)
 	uint8_t sreg;
@@ -46,19 +56,6 @@ uint16_t readTimer3(void) {
 	// Restore global interrupt flag
 	SREG = sreg;
 	return i;
-}
-void resetTimer3(void) {
-	// 17.3 Accessing 16-bit Registers (page 138)
-	uint8_t sreg;
-	// Save global interrupt flag
-	// 7.4.1 SREG – AVR Status Register (page 14)
-	sreg = SREG;
-	// Disable interrupts
-	cli();
-	// Write TCNTn
-	resetTimer3Unsafe();
-	// Restore global interrupt flag
-	SREG = sreg;
 }
 
 ISR(TIMER3_COMPA_vect)

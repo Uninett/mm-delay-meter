@@ -1,5 +1,3 @@
-/* Datalogger: save to SD card, and print to log file */
-
 #include <FileIO.h>
 #include "datalogger.h"
 #include "measurement_samples.h"
@@ -7,7 +5,6 @@
 // delete files: rm -rf /mnt/sda1/arduino/delay/*
 
 void SDCardSetup() {
-    // Initialize the Bridge and the Serial
     FileSystem.begin();
 }
 
@@ -26,7 +23,7 @@ static void SDCardGenerateNewFile(String &name, char mode)
 
 
 String SDCardSaveData(String start_time, String date, uint8_t measurements, char mode) {
-    // open the file. note that only one file can be open at a time,
+    // Open the file. note that only one file can be open at a time,
     // so you have to close this one before opening another.
     String filename = "";
     SDCardGenerateNewFile(filename, mode);
@@ -86,14 +83,14 @@ String SDCardSaveData(String start_time, String date, uint8_t measurements, char
     	}
     }
 
-    // if the file is available, write to it:
+    // If the file is available, write to it:
     if (data_file) {
     	//Serial.println(data_string);
         data_file.println(data_string);
         data_file.close();
         Log.println("Write to file " + filename);
     }
-    // if the file isn't open, pop up an error:
+    // If the file isn't open, pop up an error:
     else {
         //Serial.println("Error opening " + filename);
         Log.println("Error opening " + filename);

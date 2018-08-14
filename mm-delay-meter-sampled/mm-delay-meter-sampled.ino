@@ -8,23 +8,20 @@
 #include "src/ui.h"
 #include <Process.h>
 
-volatile bool           start_new_series  = false;
-volatile bool           running           = false;
-volatile uint8_t mode = VIDEO_MODE;
-//uint8_t wifi_attempts = 0;
-//bool    time_status   = false;   // true if the unit has been connected to wifi since power-up
-volatile bool    mode_changed  = false;
-volatile bool    mode_stopped  = false;
+volatile bool    start_new_series   = false;
+volatile bool    running            = false;
+volatile bool    mode_changed       = false;
+volatile bool    mode_stopped       = false;
 volatile bool    start_measurements = false;
 volatile bool    stop_measurements  = false;
-//String  networkId     = "UNINETT_guest";
-String  date;
-String  start_time;
-bool first_edge;
+volatile uint8_t mode               = VIDEO_MODE;
+volatile uint8_t lastButtonState    = LOW;
+volatile uint8_t buttonState        = LOW;
 volatile unsigned long lastDebounceTime = 0;
 volatile unsigned long debounceDelay    = 50; 
-volatile uint8_t lastButtonState = LOW;
-volatile uint8_t buttonState     = LOW;
+String date;
+String start_time;
+bool first_edge;
 Process p;
 Logger Log;
 
@@ -192,6 +189,7 @@ void loop() {
   }
 }
 
+/* Start/stop */
 ISR(INT0_vect)
 {
   /* START */
@@ -210,6 +208,7 @@ ISR(INT0_vect)
   }
 }
 
+/* Change mode */
 ISR(INT1_vect) 
 { 
   // Disable interrupts from this pin

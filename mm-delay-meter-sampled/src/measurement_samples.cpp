@@ -1,6 +1,3 @@
-/* Samples the light sensor every 200us (5kHz), and measures delay since light was sent to the LED.
- * Implements a maximum smoothing filter and rising edge detection for detecting 
- * a recieved light pulse. */
 #include "measurement_samples.h"
 #include "timer3.h"
 #include "timer1.h"
@@ -52,6 +49,8 @@ void measurementSamplesSetMode(uint8_t mode)
     startTimer3(mode);
     pauseTimer3();
     timer3ClearSamplingFlag();
+    
+    resetSavedMeasurements();
 
 	if (mode == VIDEO_MODE){
 		/* Change ADC's Vref to default 5V */
@@ -122,11 +121,6 @@ void measurementSamplesSetMode(uint8_t mode)
 		mean = mean/NUM_SAMPLES;    
 		idle_mic_val = mean;
 	}
-}
-
-bool measurementSamplesCheckMeasuredFlag()
-{
-	return measured_delay_flag;
 }
 
 
@@ -274,20 +268,15 @@ bool measurementSamplesRisingEdgeDetection(uint8_t mode, bool start_new_series)
 	return false;
 }
 
-uint8_t getNumMeasurementsCompleted()
-{
-	return i_m;
-}
 void resetNumMeasurementsCompleted()
 {
 	i_m = 0;
 }
-void resetSavedMeasurements()
+uint8_t getNumMeasurementsCompleted()
 {
-	for (uint8_t i = 0; i < BUF_SIZE; i++){
-		deltaMicrosSaved[i] = 0;
-	}
+	return i_m;
 }
+
 void setMeasuredFlag()
 {
 	measured_delay_flag = 1;
@@ -296,18 +285,26 @@ void clearMeasuredFlag()
 {
 	measured_delay_flag = 0;
 }
-
+bool measurementSamplesCheckMeasuredFlag()
+{
+	return measured_delay_flag;
+}
 
 void measurementSamplesClearLightRecievedFlag()
 {
 	light_recieved_at_sensor_flag = 0;
 }
-
 void measurementSamplesClearSoundRecievedFlag()
 {
 	sound_recieved_at_mic_flag = 0;
 }
 
+void resetSavedMeasurements()
+{
+	for (uint8_t i = 0; i < BUF_SIZE; i++){
+		deltaMicrosSaved[i] = 0;
+	}
+}
 String measurementSamplesGetSavedSample(uint8_t index)
 {
 	String sample;

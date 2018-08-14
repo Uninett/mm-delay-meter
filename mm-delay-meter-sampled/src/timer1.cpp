@@ -1,6 +1,3 @@
-/* Timer1 controls the LED and speaker on/off and the stopwatch that measures delay.
- * Has a period of 4194 ms before timer overflow, and a resolution of 64us. */
-
 #include "timer1.h"
 #include "config.h"
 
@@ -29,6 +26,19 @@ void startTimer1(void) {
 	resumeTimer1();
 }
 
+void resetTimer1(void) {
+	// 17.3 Accessing 16-bit Registers (page 138)
+	uint8_t sreg;
+	// Save global interrupt flag
+	// 7.4.1 SREG – AVR Status Register (page 14)
+	sreg = SREG;
+	// Disable interrupts
+	cli();
+	// Write TCNTn
+	resetTimer1Unsafe();
+	// Restore global interrupt flag
+	SREG = sreg;
+}
 
 uint16_t readTimer1(void) {
 	// 17.3 Accessing 16-bit Registers (page 138)
@@ -44,20 +54,6 @@ uint16_t readTimer1(void) {
 	// Restore global interrupt flag
 	SREG = sreg;
 	return i;
-}
-
-void resetTimer1(void) {
-	// 17.3 Accessing 16-bit Registers (page 138)
-	uint8_t sreg;
-	// Save global interrupt flag
-	// 7.4.1 SREG – AVR Status Register (page 14)
-	sreg = SREG;
-	// Disable interrupts
-	cli();
-	// Write TCNTn
-	resetTimer1Unsafe();
-	// Restore global interrupt flag
-	SREG = sreg;
 }
 
 ISR(TIMER1_OVF_vect){

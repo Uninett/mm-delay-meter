@@ -1,4 +1,7 @@
-#pragma once
+/* Timer1 controls the LED and speaker on/off and the stopwatch that measures delay.
+ * Has a period of 4194 ms before timer overflow, and a resolution of 64us. */
+#ifndef TIMER1_H
+#define TIMER1_H
 
 #include <inttypes.h>
 
@@ -22,8 +25,10 @@ extern uint16_t __timer1CounterValue;
 #define pauseTimer1() TCCR1B = 0
 #define resumeTimer1() TCCR1B = __timer1Control
 extern void startTimer1(void);
-extern uint16_t readTimer1(void);
 extern void resetTimer1(void);
+extern uint16_t readTimer1(void);
 
 bool timer1CheckFlag(uint8_t flag_type);
 void timer1ClearFlags();
+
+#endif /*TIMER1_H*/

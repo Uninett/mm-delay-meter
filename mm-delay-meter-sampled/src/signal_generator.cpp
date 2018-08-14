@@ -1,6 +1,3 @@
-/* Generates the speaker and LED signals.
- * Timer 1 controls the on/off interval. */
-
 #include "signal_generator.h"
 #include "timer1.h"
 #include "measurement_samples.h"
@@ -21,7 +18,7 @@ void signalGeneratorSetup()
 void signalGeneratorLEDOn()
 {	
 	measurementSamplesClearLightRecievedFlag();
-	resetTimer1();		// Redundant? It has already overflowed		
+	resetTimer1();	
 	digitalWrite(ledPin, HIGH);
 }
 

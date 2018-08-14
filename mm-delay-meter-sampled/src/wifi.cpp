@@ -29,7 +29,7 @@
 //     p.runShellCommand("wifi ");
 // }
 
-// bool wifiStatus()
+// bool wifiStatus2()
 // {
 //     Process wifiCheck;
 //     String resultStr = "";
@@ -65,8 +65,16 @@
 //         resultStr.trim();
 //         //if (resultStr != ""){
 //             Serial.println();
-//             Serial.print("Connected to UNINETT_guest");      
-//             Serial.print(F("\nIP: "));
+//             String ssid = "";
+//             wifiCheck.runShellCommand(F("/usr/bin/pretty-wifi-info.lua | grep \"SSID\" | cut -f2 -d\":\"" ));
+//             while (wifiCheck.running());
+//             while (wifiCheck.available() > 0) {
+//                 char c = wifiCheck.read();
+//                 ssid += c;
+//             }
+//             Serial.print("Connected to ");
+//             Serial.print(ssid);      
+//             Serial.print(F(".\nIP: "));
 //             Serial.println(resultStr);
 //             return true;
 //         // }
@@ -79,52 +87,11 @@
 //     }
 // }
 
-String result = "";
-
-void wifiConnect(Process p)
-{
-    result = "";
-    p.runShellCommand(F("/mnt/sda1/arduino/wifi_connect.sh"));
-    while (p.running());
-    while (p.available() > 0){
-        char c = p.read();
-        result += c;
-    }
-    Serial.println(result);
-}
-
-bool wifiStatus(Process p)
-{
-    result = "";
-    p.runShellCommand(F("/mnt/sda1/arduino/wifi_status.sh"));
-    while (p.available() > 0){
-        char c = p.read();
-        result += c;
-    }
-    result.trim();
-    if (result == "0"){
-        return false;
-    }
-    else{
-        return true;
-    }
-}
-
-void upload(Process p)
-{
-    result = "";
-    p.runShellCommand(F("/mnt/sda1/arduino/upload.sh"));
-    while (p.running());
-    while (p.available() > 0){
-      char c = p.read();
-      result += c;
-    }
-    Serial.println(result); 
-}
+//String result = "";
 
 bool getDateStatus(Process p)
 {
-    result = "";
+    String result = "";
     p.runShellCommand(F("cat /mnt/sda1/arduino/date_ok.txt"));
     while (p.available() > 0){
         char c = p.read();
@@ -141,7 +108,7 @@ bool getDateStatus(Process p)
 
 void wifiStartup(Process p)
 {
-    result = "";
+    //result = "";
     p.runShellCommand(F("/mnt/sda1/arduino/startup.sh"));
     while (p.running());
     // while (p.available() > 0){
@@ -153,7 +120,7 @@ void wifiStartup(Process p)
 
 void wifiStatusAndConnectAndUpload(Process p)
 {
-    result = "";
+    //result = "";
     p.runShellCommand(F("/mnt/sda1/arduino/periodic_wifi_func.sh"));
     while (p.running());
     // while (p.available() > 0){

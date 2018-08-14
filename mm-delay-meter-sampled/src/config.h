@@ -1,4 +1,7 @@
-#pragma once
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#include "Arduino.h"
 
 /* Buttons */
 #define modeSelectPin				2	// INT1
@@ -18,10 +21,8 @@
 #define buzzerPin					6	// Try changing from pin 8 to 4,5,6
 #define ledPin  					12
 
-//#define testFreqPin					6
-
 #define NUM_SAMPLES 				10
 #define VIDEO_MODE		            1
 #define SOUND_MODE		            2
 
-#include "Arduino.h"
+#endif /*CONFIG_H*/
