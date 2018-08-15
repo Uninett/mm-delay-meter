@@ -13,12 +13,19 @@ These logs are uploaded to [UNINETT multimedia delay database](http://delay.unin
 
 The device connects automatically to a known available wireless network. When connected, it automatically uploads any logs that were saved when a WiFi was unavailable. It periodically checks its own WiFi status, and decides whether to reconnect and/or try to upload files based on the current status.
 
+There are two push buttons connected to the MM-delay meter. One button starts or stops a measurement series, and the other button allows the user to switch between the two modes of operation. A press of the mode button while a measurement series is running is equivalent to pressing the stop button, with the addition of changing the mode.
+
+The three green LEDs indicate how many measurements the user has made, and the current mode.
+The red LED emits light when the start button is pressed, and is dark when a series has stopped or is complete.
+The white LED generates the light pulses that must be captured at the other end of the multimedia system.
+
 ## Getting started
 #### Requirements
 - Arduino Yún Rev 2
 - Micro SD card
 - Circuit: 
-![mm-delay-meter](img/circuit_diagram_new.PNG)
+![mm-delay-meter](img/circuit_diagram.PNG)
 
 ## What's next?
 - [ ] Delete old logs when SD card is full
+- [ ] Connect to eduroam (WPA2-Enterprise security)
