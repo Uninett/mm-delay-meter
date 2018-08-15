@@ -1,4 +1,4 @@
-#include "measurement_samples.h"
+#include "sensor_samples.h"
 #include "timer3.h"
 #include "timer1.h"
 #include "config.h"
@@ -6,7 +6,6 @@
 bool light_recieved_at_sensor_flag;
 bool sound_recieved_at_mic_flag;
 bool measured_delay_flag;
-unsigned long deltaMicros;
 int16_t idle_mic_val;
 int16_t idle_ltv_val;
 
@@ -19,9 +18,11 @@ uint8_t max_sample_index;
 /* Rising edge detection */
 uint8_t i_m;
 int16_t current_max;
+unsigned long deltaMicros;
 unsigned long deltaMicrosSaved[BUF_SIZE];
 
-void measurementSamplesSetup(uint8_t mode)
+void sensorSamplesSetup(uint8_t mode)
+/*  */
 {
 	// Initialize measurement series
 	i_m = 0;
@@ -31,19 +32,14 @@ void measurementSamplesSetup(uint8_t mode)
     pinMode(lightSensorPin, INPUT);
     pinMode(microphonePin, INPUT);
 
-    // Initialize sampling interval
-    startTimer3(mode);
-    pauseTimer3();
-    timer3ClearSamplingFlag();
-
-    measurementSamplesSetMode(mode);
-    measurementSamplesInitialize(mode);
+    sensorSamplesSetMode(mode);
+    sensorSamplesInitialize(mode);
 
     /* ADC speed - prescaler 16 */ 
     ADCSRA = (ADCSRA & B11111000) | 4; 
 }
 
-void measurementSamplesSetMode(uint8_t mode)
+void sensorSamplesSetMode(uint8_t mode)
 {
 	// Initialize sampling interval
     startTimer3(mode);
@@ -125,8 +121,7 @@ void measurementSamplesSetMode(uint8_t mode)
 
 
 /* Maximum smoothing filter */
-
-void measurementSamplesInitialize(uint8_t mode)
+void sensorSamplesInitialize(uint8_t mode)
 {
 	for (int i = 0; i < NUM_SAMPLES; i++){
 		samples[i] = (mode == VIDEO_MODE) ? idle_ltv_val : idle_mic_val;
@@ -136,11 +131,11 @@ void measurementSamplesInitialize(uint8_t mode)
 	max_sample_index = 0;
 }
 
-int16_t measurementSamplesMaxSmoothingFilter()
+static int16_t sensorSamplesMaxSmoothingFilter()
 {
 	int16_t raw_sample = analogRead(lightSensorPin);
 
-	// Add sample to saved samples
+	// Add new sample to saved samples
 	samples[current_index] = raw_sample;
 
 	// Check if new sample replaces old max in samples[]
@@ -168,9 +163,9 @@ int16_t measurementSamplesMaxSmoothingFilter()
 
 /* Rising edge detection */
 
-static void measurementSamplesRisingEdgeDetectionVideo(bool &edge_detected, bool start_new_series)
+static void sensorSamplesRisingEdgeDetectionVideo(bool &edge_detected, bool start_new_series)
 {
-	current_max = measurementSamplesMaxSmoothingFilter();
+	current_max = sensorSamplesMaxSmoothingFilter();
 	edge_detected = false;
 
 	static uint8_t acc_pos_slopes;
@@ -195,7 +190,7 @@ static void measurementSamplesRisingEdgeDetectionVideo(bool &edge_detected, bool
 	prev_max = current_max;
 }
 
-static void measurementSamplesRisingEdgeDetectionSound(bool &edge_detected, bool start_new_series)
+static void sensorSamplesRisingEdgeDetectionSound(bool &edge_detected, bool start_new_series)
 {
 	static uint8_t num_pos_measures;
 	if (start_new_series){
@@ -218,7 +213,7 @@ static void measurementSamplesRisingEdgeDetectionSound(bool &edge_detected, bool
 	}
 }
 
-bool measurementSamplesRisingEdgeDetection(uint8_t mode, bool start_new_series)
+bool sensorSamplesRisingEdgeDetection(uint8_t mode, bool start_new_series)
 {
 	// Get timestamp as early as possible
 	unsigned short delta = readTimer1();
@@ -227,10 +222,10 @@ bool measurementSamplesRisingEdgeDetection(uint8_t mode, bool start_new_series)
 	switch (mode)
 	{
 		case VIDEO_MODE:
-			measurementSamplesRisingEdgeDetectionVideo(edge_detected, start_new_series);
+			sensorSamplesRisingEdgeDetectionVideo(edge_detected, start_new_series);
 			break;
 		case SOUND_MODE:
-			measurementSamplesRisingEdgeDetectionSound(edge_detected, start_new_series);
+			sensorSamplesRisingEdgeDetectionSound(edge_detected, start_new_series);
 			break;
 	}
 
@@ -277,24 +272,24 @@ uint8_t getNumMeasurementsCompleted()
 	return i_m;
 }
 
-void setMeasuredFlag()
+void setMeasuredCompleteFlag()
 {
 	measured_delay_flag = 1;
 }
-void clearMeasuredFlag()
+void clearMeasuredCompleteFlag()
 {
 	measured_delay_flag = 0;
 }
-bool measurementSamplesCheckMeasuredFlag()
+bool checkMeasuredCompleteFlag()
 {
 	return measured_delay_flag;
 }
 
-void measurementSamplesClearLightRecievedFlag()
+void clearLightRecievedFlag()
 {
 	light_recieved_at_sensor_flag = 0;
 }
-void measurementSamplesClearSoundRecievedFlag()
+void clearSoundRecievedFlag()
 {
 	sound_recieved_at_mic_flag = 0;
 }
@@ -305,7 +300,7 @@ void resetSavedMeasurements()
 		deltaMicrosSaved[i] = 0;
 	}
 }
-String measurementSamplesGetSavedSample(uint8_t index)
+String getSavedMeasurement(uint8_t index)
 {
 	String sample;
 	sample = String(deltaMicrosSaved[index]/1000.0);

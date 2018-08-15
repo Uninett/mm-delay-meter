@@ -1,6 +1,6 @@
 #include <FileIO.h>
 #include "datalogger.h"
-#include "measurement_samples.h"
+#include "sensor_samples.h"
 
 // delete files: rm -rf /mnt/sda1/arduino/delay/*
 
@@ -77,7 +77,7 @@ String SDCardSaveData(String start_time, String date, uint8_t measurements, char
     	data_string += ",";
     	data_string += time_string;
     	data_string += ",";
-    	data_string += measurementSamplesGetSavedSample(i);
+    	data_string += getSavedMeasurement(i);
     	if ( i < max - 1 ){
     		data_string += "\n";
     	}
@@ -98,7 +98,7 @@ String SDCardSaveData(String start_time, String date, uint8_t measurements, char
     // Reset to default values, ready for new measurements
     resetNumMeasurementsCompleted();
 	resetSavedMeasurements();
-	clearMeasuredFlag();
+	clearMeasuredCompleteFlag();
 
     return filename;
 }

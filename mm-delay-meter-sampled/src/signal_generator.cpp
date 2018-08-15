@@ -1,6 +1,6 @@
 #include "signal_generator.h"
 #include "timer1.h"
-#include "measurement_samples.h"
+#include "sensor_samples.h"
 #include "config.h"
 
 void signalGeneratorSetup()
@@ -19,7 +19,7 @@ void signalGeneratorSetup()
 void signalGeneratorLEDOn()
 /* Reset delay timer to zero and turn on LED */
 {	
-	measurementSamplesClearLightRecievedFlag();
+	clearLightRecievedFlag();
 	resetTimer1();	
 	digitalWrite(ledPin, HIGH);
 }
@@ -51,7 +51,7 @@ void signalGeneratorStatusLEDControl()
 void signalGeneratorSpeakerOn()
 /* Reset delay timer to zero and turn on buzzer */
 {
-	measurementSamplesClearSoundRecievedFlag();
+	clearSoundRecievedFlag();
 	resetTimer1();
 	digitalWrite(buzzerPin, HIGH);
 }

@@ -2,7 +2,7 @@
 #include "src/timer1.h"
 #include "src/timer3.h"
 #include "src/signal_generator.h"
-#include "src/measurement_samples.h"
+#include "src/sensor_samples.h"
 #include "src/datalogger.h"
 #include "src/wifi.h"
 #include "src/ui.h"
@@ -96,7 +96,7 @@ void setup() {
   /* SETUP */
   SDCardSetup();
   signalGeneratorSetup();
-  measurementSamplesSetup(mode);
+  sensorSamplesSetup(mode);
   uiSetup();
 
   Log.println(F("Ready"));
@@ -106,11 +106,11 @@ void setup() {
 
 void loop() {
   if (mode_changed){
-    if (!measurementSamplesCheckMeasuredFlag()){
+    if (!checkMeasuredCompleteFlag()){
       mode_changed = false;
       setModeLEDs(mode);
-      measurementSamplesSetMode(mode);
-      measurementSamplesInitialize(mode); 
+      sensorSamplesSetMode(mode);
+      sensorSamplesInitialize(mode); 
     }    
   }
   if (start_measurements){
@@ -134,7 +134,7 @@ void loop() {
     signalGeneratorStatusLEDControl();
   }
   if (timer3CheckSamplingFlag()){
-    bool first_edge = measurementSamplesRisingEdgeDetection(mode, start_new_series);
+    bool first_edge = sensorSamplesRisingEdgeDetection(mode, start_new_series);
     if (start_new_series) start_new_series = false;
     if (first_edge){
       // Get start time
@@ -162,8 +162,8 @@ void loop() {
       }
     }
   }
-  if (measurementSamplesCheckMeasuredFlag()){
-    clearMeasuredFlag();
+  if (checkMeasuredCompleteFlag()){
+    clearMeasuredCompleteFlag();
     // A full measurement series is complete
     Log.println(F("Measurement series finished."));
     stopMeasurement();
@@ -200,7 +200,7 @@ ISR(INT0_vect)
   else if (running){
     // Save if something can be saved
     if (getNumMeasurementsCompleted() > 0){
-      setMeasuredFlag();
+      setMeasuredCompleteFlag();
     }
     else{
       stop_measurements = true;
@@ -229,12 +229,12 @@ ISR(INT1_vect)
       if (running){
         // Save if something can be saved
         if (getNumMeasurementsCompleted() > 0){
-          setMeasuredFlag();
+          setMeasuredCompleteFlag();
           mode_stopped = true;
         }
         else{
           stop_measurements = true;
-          clearMeasuredFlag();
+          clearMeasuredCompleteFlag();
           mode_stopped = false;
         }
       }
