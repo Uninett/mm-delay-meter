@@ -25,6 +25,35 @@ static void SDCardGenerateNewFile(String &name, char mode)
 	name.trim();
 }
 
+static int getHourFromTimeString(String start_time)
+/* Extract the hour from a time string of the form hh:mm and convert to integer */
+{
+    String hour_string = "";
+    Process time;
+
+    time.runShellCommand("echo \"" + start_time + "\" | cut -d \":\" -f 1");
+    while (time.available() > 0){
+        char c = time.read();
+        hour_string += c;
+    }
+    int hour = hour_string.toInt();
+    return hour;
+}
+
+static int getMinuteFromTimeString(String start_time)
+/* Extract the minute from a time string of the form hh:mm and convert to integer */
+{
+    String minute_string = "";
+    Process time;
+
+    time.runShellCommand("echo \"" + start_time + "\" | cut -d \":\" -f 2");
+    while (time.available() > 0){
+        char c = time.read();
+        minute_string += c;
+    }
+    int minute = minute_string.toInt();
+    return minute;
+}
 
 void SDCardSaveData(String start_time, String date, uint8_t measurements, char mode)
 /* Save a measurement series in a file in the SD card, with the format expected by the database. */
@@ -33,36 +62,18 @@ void SDCardSaveData(String start_time, String date, uint8_t measurements, char m
     // so you have to close this one before opening another.
     String filename = "";
     SDCardGenerateNewFile(filename, mode);
-    //Serial.print(F("File name: "));
-    //Serial.println(filename);
     Log.println("Open file " + filename);
     File data_file = FileSystem.open(filename.c_str(), FILE_APPEND);
 
-    String data_string = "";
-    String time_string = "";
-    int hour = 0; 
-    int minute = 0;
-    Process time;
-
 	// Get first timestamp (assume minute accuracy) H:M
-	time.runShellCommand("echo \"" + start_time + "\" | cut -d \":\" -f 1");
-	while (time.available() > 0){
-		char c = time.read();
-		time_string += c;
-	}
-	hour = time_string.toInt();
-	time_string = "";
-	time.runShellCommand("echo \"" + start_time + "\" | cut -d \":\" -f 2");
-	while (time.available() > 0){
-		char c = time.read();
-		time_string += c;
-	}
-	minute = time_string.toInt();
-
+    int hour = getHourFromTimeString(start_time);
+    int minute = getMinuteFromTimeString(start_time);
     
+    String time_string = String(hour) + ":" + String(minute);
+    String data_string = "";
     date.trim();
-    time_string = String(hour) + ":" + String(minute);
 
+    // Go through all delay measurements in the series
     uint8_t max;
     if (measurements == 0) max = BUF_SIZE; else max = measurements;
     for (uint8_t i = 0; i < max; i++){
