@@ -6,7 +6,9 @@ uint16_t __timer3CounterValue;
 volatile bool timer3_sample_flag;
 
 // On 16 MHz Arduino boards, this function has a resolution of 4us
-void startTimer3(int mode) {
+void startTimer3(int mode)
+/* Set timer registers and start counter at 0 */
+{
 	pauseTimer3();
 	TCCR3A = 0;
 	TCCR3C = 0;
@@ -28,7 +30,9 @@ void startTimer3(int mode) {
 	resumeTimer3();
 }
 
-void resetTimer3(void) {
+void resetTimer3(void)
+/* Reset TCNT3 to 0 while making sure nothing can interrupt the resetting */
+{
 	// 17.3 Accessing 16-bit Registers (page 138)
 	uint8_t sreg;
 	// Save global interrupt flag
@@ -42,7 +46,9 @@ void resetTimer3(void) {
 	SREG = sreg;
 }
 
-uint16_t readTimer3(void) {
+uint16_t readTimer3(void)
+/* Read the value in TCNT3 while making sure nothing can interrupt the read */
+{
 	// 17.3 Accessing 16-bit Registers (page 138)
 	uint8_t sreg;
 	uint16_t i;
@@ -64,6 +70,7 @@ ISR(TIMER3_COMPA_vect)
 }
 
 bool timer3CheckSamplingFlag()
+/* Check for a timer 3 interrupt that signals a sample should be taken */
 {
 	if (timer3_sample_flag){
 		timer3_sample_flag = 0;
@@ -75,6 +82,7 @@ bool timer3CheckSamplingFlag()
 }
 
 void timer3ClearSamplingFlag()
+/* Signal that the timer 3 interrupt has been handled */
 {
 	timer3_sample_flag = 0;
 }

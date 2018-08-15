@@ -7,7 +7,9 @@ volatile bool timer1_ovf_flag;
 volatile bool timer1_comp_match_flag;
 
 // On 16 MHz Arduino boards, this function has a resolution of 64us
-void startTimer1(void) {
+void startTimer1(void)
+/* Set timer registers and start counter at 0 */
+{
 	pauseTimer1();
 	TCCR1A = 0;
 	TCCR1C = 0;
@@ -26,7 +28,9 @@ void startTimer1(void) {
 	resumeTimer1();
 }
 
-void resetTimer1(void) {
+void resetTimer1(void)
+/* Reset TCNT1 to 0 while making sure nothing can interrupt the resetting */
+{
 	// 17.3 Accessing 16-bit Registers (page 138)
 	uint8_t sreg;
 	// Save global interrupt flag
@@ -40,7 +44,9 @@ void resetTimer1(void) {
 	SREG = sreg;
 }
 
-uint16_t readTimer1(void) {
+uint16_t readTimer1(void)
+/* Read the value in TCNT1 while making sure nothing can interrupt the read */
+{
 	// 17.3 Accessing 16-bit Registers (page 138)
 	uint8_t sreg;
 	uint16_t i;
@@ -65,6 +71,7 @@ ISR(TIMER1_COMPA_vect){
 }
 
 bool timer1CheckFlag(uint8_t flag_type)
+/* Check for a timer 1 interrupt of the specified type */
 {
 	switch (flag_type){
 		case OVF:
@@ -90,6 +97,7 @@ bool timer1CheckFlag(uint8_t flag_type)
 }
 
 void timer1ClearFlags()
+/* Signal that the timer 1 interrupt has been handled */
 {
 	timer1_ovf_flag = 0;
 	timer1_comp_match_flag = 0;
