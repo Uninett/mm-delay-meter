@@ -1,94 +1,5 @@
 #include "wifi.h"
 
-// void wifiConfig(String yunName, String yunPsw, String wifissid, String wifipsw, String wifiAPname, String countryCode, String encryption)
-// {
-//     Process p;
-
-//     p.runShellCommand("blink-start 100"); //start the blue blink
-
-//     p.runShellCommand("hostname " + yunName); //change the current hostname
-//     p.runShellCommand("uci set system.@system[0].hostname='" + yunName + "'"); //change teh hostname in uci
-
-//     p.runShellCommand("uci set arduino.@arduino[0].access_point_wifi_name='" + wifiAPname + "'");
-
-//     //this block resets the wifi psw
-//     p.runShellCommand("uci set wireless.@wifi-iface[0].encryption='" + encryption + "'");
-//     p.runShellCommand("uci set wireless.@wifi-iface[0].mode='sta'\n");
-//     p.runShellCommand("uci set wireless.@wifi-iface[0].ssid='" + wifissid + "'");
-//     p.runShellCommand("uci set wireless.@wifi-iface[0].key='" + wifipsw + "'");
-//     p.runShellCommand("uci set wireless.radio0.channel='auto'");
-//     p.runShellCommand("uci set wireless.radio0.country='" + countryCode + "'");
-//     p.runShellCommand("uci delete network.lan.ipaddr");
-//     p.runShellCommand("uci delete network.lan.netmask");
-//     p.runShellCommand("uci set network.lan.proto='dhcp'");
-
-//     p.runShellCommand("echo -e \"" + yunPsw + "\n" + yunPsw + "\" | passwd root"); //change the passwors
-//     p.runShellCommand("uci commit"); //save the mods done via UCI
-//     p.runShellCommand("blink-stop"); //start the blue blink
-
-//     p.runShellCommand("wifi ");
-// }
-
-// bool wifiStatus2()
-// {
-//     Process wifiCheck;
-//     String resultStr = "";
-//     // wifiCheck.runShellCommand(F("/usr/bin/pretty-wifi-info.lua" ));
-//     // while (wifiCheck.available() > 0) {
-//     //     char c = wifiCheck.read();
-//     //     resultStr += c;
-//     // }
-//     // Serial.println(resultStr);
-//     // resultStr = "";
-//     // delay(1000);
-//     wifiCheck.runShellCommand(F("/usr/bin/pretty-wifi-info.lua | grep \"Signal\" | cut -f2 -d\" \" | cut -f1 -d\"%\"" ));
-//     while (wifiCheck.running());
-//     while (wifiCheck.available() > 0) {
-//         char c = wifiCheck.read();
-//         resultStr += c;
-//     }
-//     delay(1000);
-//     Serial.println(resultStr);
-//     resultStr.trim();
-//     if (resultStr.toInt() != 0){
-
-//         Serial.println("Signal " + resultStr);
-//         resultStr = "";
-//         wifiCheck.runShellCommand(F("/usr/bin/pretty-wifi-info.lua | grep \"IP address\" | cut -f2 -d\":\" | cut -f1 -d\"/\"" ));
-//         while (wifiCheck.running());
-//         while (wifiCheck.available() > 0) {
-//             char c = wifiCheck.read();
-//             resultStr += c;
-//         }
-//         delay(1000);
-//         Serial.println(resultStr);
-//         resultStr.trim();
-//         //if (resultStr != ""){
-//             Serial.println();
-//             String ssid = "";
-//             wifiCheck.runShellCommand(F("/usr/bin/pretty-wifi-info.lua | grep \"SSID\" | cut -f2 -d\":\"" ));
-//             while (wifiCheck.running());
-//             while (wifiCheck.available() > 0) {
-//                 char c = wifiCheck.read();
-//                 ssid += c;
-//             }
-//             Serial.print("Connected to ");
-//             Serial.print(ssid);      
-//             Serial.print(F(".\nIP: "));
-//             Serial.println(resultStr);
-//             return true;
-//         // }
-//         // else{
-//         //     return false;
-//         // }
-//     }
-//     else{
-//         return false;
-//     }
-// }
-
-//String result = "";
-
 bool getDateStatus(Process p)
 /* date_ok.txt contains '0' if the device has not been connected to WiFi since power-up. 
  * When the device has been connected to WiFi, the time and date is set correctly,
@@ -112,26 +23,14 @@ bool getDateStatus(Process p)
 void wifiStartup(Process p)
 /* Check WiFi configuration and connect at power-up. */
 {
-    //result = "";
     p.runShellCommand(F("/mnt/sda1/arduino/startup.sh"));
     while (p.running());
-    // while (p.available() > 0){
-    //   char c = p.read();
-    //   result += c;
-    // }
-    // Serial.println(result); 
 }
 
 void wifiStatusAndConnectAndUpload(Process p)
 /* Runs periodically. Checks WiFi status and reconnects if needed. Uploads new
  * data to a database and marks them as uploaded. */
 {
-    //result = "";
     p.runShellCommand(F("/mnt/sda1/arduino/periodic_wifi_func.sh"));
     while (p.running());
-    // while (p.available() > 0){
-    //   char c = p.read();
-    //   result += c;
-    // }
-    // Serial.println(result); 
 }
