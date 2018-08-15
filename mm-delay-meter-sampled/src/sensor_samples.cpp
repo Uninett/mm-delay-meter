@@ -22,9 +22,10 @@ unsigned long deltaMicros;
 unsigned long deltaMicrosSaved[BUF_SIZE];
 
 void sensorSamplesSetup(uint8_t mode)
-/*  */
+/* Initialize status flags. Set pin directions for sensor pins.
+ * Set initial mode (video). 
+ * Specify the ADC clock frequency, which speeds up the conversion compared to the default. */
 {
-	// Initialize measurement series
 	i_m = 0;
 	measured_delay_flag = 0;
 	light_recieved_at_sensor_flag = 0;
@@ -40,8 +41,10 @@ void sensorSamplesSetup(uint8_t mode)
 }
 
 void sensorSamplesSetMode(uint8_t mode)
+/* Initialize the sampling timer and get idle samples 
+ * from the sensor corresponding to the current mode. */
 {
-	// Initialize sampling interval
+	/* Initialize sampling interval */
     startTimer3(mode);
     pauseTimer3();
     timer3ClearSamplingFlag();
@@ -55,7 +58,8 @@ void sensorSamplesSetMode(uint8_t mode)
 		for (int i = 0; i < 100; i++){
 			dummyRead = analogRead(A0);
 		}
-    	//Serial.println(F("Calibrating l-t-v sensor..."));
+
+    	/* Calibrate light sensor measurements */
     	Log.println(F("Set VIDEO mode"));
 		int current_ltv = analogRead(lightSensorPin);
 		int prev_ltv = current_ltv;
@@ -82,7 +86,6 @@ void sensorSamplesSetMode(uint8_t mode)
 		idle_ltv_val = mean;
     }
 
-    // Calibrate microphone measurements
 	if(mode == SOUND_MODE){
 		/* Change ADC's Vref to internal 2.56V */
 		analogReference(INTERNAL);
@@ -91,7 +94,7 @@ void sensorSamplesSetMode(uint8_t mode)
 			dummyRead = analogRead(A1);
 		}
 
-		//Serial.println(F("Calibrating mic..."));
+		/* Calibrate microphone measurements */
 		Log.println(F("Set AUDIO mode"));
 		int current_mic = analogRead(microphonePin);
 		int prev_mic = current_mic;
@@ -119,9 +122,8 @@ void sensorSamplesSetMode(uint8_t mode)
 	}
 }
 
-
-/* Maximum smoothing filter */
 void sensorSamplesInitialize(uint8_t mode)
+/* Initialize the list of samples from the current sensor to the same idle value */
 {
 	for (int i = 0; i < NUM_SAMPLES; i++){
 		samples[i] = (mode == VIDEO_MODE) ? idle_ltv_val : idle_mic_val;
@@ -132,6 +134,9 @@ void sensorSamplesInitialize(uint8_t mode)
 }
 
 static int16_t sensorSamplesMaxSmoothingFilter()
+/* Keeps track of a window of sensor samples and the current maximum sample within this window.
+ * When the maximum from one sample to the next changes "enough", an edge is detected.
+ * Makes the edge detection more robust. */
 {
 	int16_t raw_sample = analogRead(lightSensorPin);
 
@@ -164,6 +169,9 @@ static int16_t sensorSamplesMaxSmoothingFilter()
 /* Rising edge detection */
 
 static void sensorSamplesRisingEdgeDetectionVideo(bool &edge_detected, bool start_new_series)
+/* Uses the max smoothing filter to detect when a sufficient increase in light intensity is 
+ * measured. If the increase between two subsequent samples is large enough, or there has 
+ * been a continuous increase over enough samples, there is an edge. */
 {
 	current_max = sensorSamplesMaxSmoothingFilter();
 	edge_detected = false;
@@ -191,6 +199,10 @@ static void sensorSamplesRisingEdgeDetectionVideo(bool &edge_detected, bool star
 }
 
 static void sensorSamplesRisingEdgeDetectionSound(bool &edge_detected, bool start_new_series)
+/* If the current sample is higher than the idle value plus a small safety margin,
+ * or if the samples have been above idle for some time, there is an egde.
+ * The max smoothing filter will not work here because the sound waves oscillate with 
+ * too high frequency. */
 {
 	static uint8_t num_pos_measures;
 	if (start_new_series){
@@ -214,6 +226,9 @@ static void sensorSamplesRisingEdgeDetectionSound(bool &edge_detected, bool star
 }
 
 bool sensorSamplesRisingEdgeDetection(uint8_t mode, bool start_new_series)
+/* When an edge is detected, the time since signal generation is recorded. 
+ * Keeps track of how many measurements that have been made and blinks status LEDs accordingly.
+ * Signals when the first edge in a series is detected and when a full series is completed. */
 {
 	// Get timestamp as early as possible
 	unsigned short delta = readTimer1();
@@ -234,9 +249,6 @@ bool sensorSamplesRisingEdgeDetection(uint8_t mode, bool start_new_series)
 		if (mode == VIDEO_MODE) light_recieved_at_sensor_flag = 1;
 		if (mode == SOUND_MODE) sound_recieved_at_mic_flag = 1;
 
-		// Serial.print(i_m);
-		// Serial.print("\t");
-		// Serial.println(deltaMicrosSaved[i_m-1]);
 		if (i_m > 0 && i_m <= BUF_PART_1){
 			// Blink statusLed1
 			digitalWrite(statusLedPin1, HIGH);
@@ -264,23 +276,28 @@ bool sensorSamplesRisingEdgeDetection(uint8_t mode, bool start_new_series)
 }
 
 void resetNumMeasurementsCompleted()
+/* Reset the counter when a new measurement series can begin */
 {
 	i_m = 0;
 }
 uint8_t getNumMeasurementsCompleted()
+/* Keep track of the number of measurements that have been made at a given moment */
 {
 	return i_m;
 }
 
 void setMeasuredCompleteFlag()
+/* Flag set when a measurement series is stopped and measurements must be saved in SD card */
 {
 	measured_delay_flag = 1;
 }
 void clearMeasuredCompleteFlag()
+/* Flag cleared after a measurement series is saved in SD card and a new one can begin */
 {
 	measured_delay_flag = 0;
 }
 bool checkMeasuredCompleteFlag()
+/* Check the flag to see if any measurements must be saved in SD card */
 {
 	return measured_delay_flag;
 }
@@ -295,14 +312,15 @@ void clearSoundRecievedFlag()
 }
 
 void resetSavedMeasurements()
+/* Reset the delay measurements to get ready for a new series */
 {
 	for (uint8_t i = 0; i < BUF_SIZE; i++){
 		deltaMicrosSaved[i] = 0;
 	}
 }
 String getSavedMeasurement(uint8_t index)
+/* Fetch a specific delay measurement */
 {
-	String sample;
-	sample = String(deltaMicrosSaved[index]/1000.0);
+	String sample = String(deltaMicrosSaved[index]/1000.0);
 	return sample;
 }

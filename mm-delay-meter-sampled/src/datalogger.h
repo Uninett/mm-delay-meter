@@ -8,11 +8,11 @@
 void SDCardSetup();
 String SDCardSaveData(String start_time, String date, uint8_t measurements, char mode);
 
-/* Print time stamps and messages to log */
+/* Print time stamped messages to log */
 class Logger {
 private:
-	char* log_file;
-	Process p;
+	char* log_file;			// Name of the log file
+	Process p;				// Process object
 public:
 	Logger();
 	begin();

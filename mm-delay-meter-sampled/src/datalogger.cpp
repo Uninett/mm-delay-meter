@@ -4,13 +4,17 @@
 
 // delete files: rm -rf /mnt/sda1/arduino/delay/*
 
-void SDCardSetup() {
+void SDCardSetup()
+/* Start the file system for writing to files in SD card through Bridge */
+{
     FileSystem.begin();
 }
 
 static void SDCardGenerateNewFile(String &name, char mode)
+/* Creates a new file with a unique name in /mnt/sda1/arduino/delay directory.
+ * '_NU' means 'not uploaded to database'. 
+ * Returns the name of the file. */
 {	
-	// Create new file with unique name in /mnt/sda1/arduino/delay directory
 	Process f;
 	f.runShellCommand("mktemp -p /mnt/sd/arduino/delay " + String(mode) + "_NU.XXXXXX");
 	while (f.running());
@@ -23,6 +27,8 @@ static void SDCardGenerateNewFile(String &name, char mode)
 
 
 String SDCardSaveData(String start_time, String date, uint8_t measurements, char mode) {
+/* Save a measurement series in a file in the SD card, with the format expected by the database. */
+{
     // Open the file. note that only one file can be open at a time,
     // so you have to close this one before opening another.
     String filename = "";
@@ -105,17 +111,20 @@ String SDCardSaveData(String start_time, String date, uint8_t measurements, char
 
 
 Logger::Logger()
+/* Constructor: initializes the name */
 {
     log_file = "/mnt/sd/arduino/log.txt";
 }
 
 Logger::begin()
+/* Start the file system for writing to files via Bridge. Remove any old version of the log */
 {
     FileSystem.begin();
     FileSystem.remove(log_file);
 }
 
 Logger::print(String input)
+/* Print to the log without newline (unused) */
 {
     File data_file = FileSystem.open(log_file, FILE_APPEND);
     if (data_file) {
@@ -125,6 +134,7 @@ Logger::print(String input)
 }
 
 Logger::println(String input)
+/* Print line to log file, with time stamp */
 {
     p.begin("date");
     p.addParameter("+%F %H:%M:%S");
