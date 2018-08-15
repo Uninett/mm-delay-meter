@@ -6,7 +6,7 @@
 
 /* Save measurement series */
 void SDCardSetup();
-String SDCardSaveData(String start_time, String date, uint8_t measurements, char mode);
+void SDCardSaveData(String start_time, String date, uint8_t measurements, char mode);
 
 /* Print time stamped messages to log */
 class Logger {

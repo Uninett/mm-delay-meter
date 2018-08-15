@@ -26,7 +26,7 @@ static void SDCardGenerateNewFile(String &name, char mode)
 }
 
 
-String SDCardSaveData(String start_time, String date, uint8_t measurements, char mode) {
+void SDCardSaveData(String start_time, String date, uint8_t measurements, char mode)
 /* Save a measurement series in a file in the SD card, with the format expected by the database. */
 {
     // Open the file. note that only one file can be open at a time,
@@ -105,8 +105,6 @@ String SDCardSaveData(String start_time, String date, uint8_t measurements, char
     resetNumMeasurementsCompleted();
 	resetSavedMeasurements();
 	clearMeasuredCompleteFlag();
-
-    return filename;
 }
 
 

@@ -173,7 +173,7 @@ void loop() {
     else{              mode_char = (mode == VIDEO_MODE) ? 'V' : 'A'; }
     mode_stopped = false;
     
-    String file = SDCardSaveData(start_time, date, getNumMeasurementsCompleted(), mode_char);
+    SDCardSaveData(start_time, date, getNumMeasurementsCompleted(), mode_char);
 
     wifiStatusAndConnectAndUpload(p); // Checks WiFi, connects and uploads files if possible
     setAllLEDs(mode);
