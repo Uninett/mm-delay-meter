@@ -45,7 +45,7 @@ wifi_config() {
 	uci set network.lan.proto='dhcp'
 	
 	# Change the password
-	"uninett" | passwd root
+	echo -e "uninett\nuninett" | passwd root
 	uci commit
 	blink-stop
 	wifi

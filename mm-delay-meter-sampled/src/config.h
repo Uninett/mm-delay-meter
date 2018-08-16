@@ -8,7 +8,7 @@
 #define startPin					3	// INT0
 
 /* Status LEDs */
-#define startIndicator				8	// Change from 13 to 8. Green LED
+#define startIndicator				8
 #define statusLedPin1				9
 #define soundModeIndicator			10	// statusLedPin2
 #define videoModeIndicator			11	// statusLedPin3
@@ -18,7 +18,7 @@
 #define microphonePin				A1
 
 /* Signals */
-#define buzzerPin					6	// Try changing from pin 8 to 4,5,6
+#define buzzerPin					6
 #define ledPin  					12
 
 #define NUM_SAMPLES 				10
