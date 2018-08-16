@@ -19,7 +19,7 @@ The three green LEDs indicate how many measurements the user has made, and the c
 The red LED emits light when the start button is pressed, and is dark when a series has stopped or is complete.
 The white LED generates the light pulses that must be captured at the other end of the multimedia system.
 
-A log file is generated and saved in /mnt/sda1/arduino/log.txt in the Arduino's external SD card. 
+A log file is generated and saved in */mnt/sda1/arduino/log.txt* in the Arduino's external SD card. 
 
 ## Getting started
 #### Requirements
