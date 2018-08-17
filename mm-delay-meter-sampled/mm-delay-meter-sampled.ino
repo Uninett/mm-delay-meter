@@ -23,6 +23,9 @@ String date;
 String start_time;
 bool first_edge;
 Process p;
+Process p1;
+Process p2;
+Process p3;
 Logger Log;
 
 void setup() {
@@ -35,7 +38,7 @@ void setup() {
   Log.begin();
 
   /* WiFi */
-  wifiStartup(p); // Connects wifi, and uploads files to database if wifi connected and any files available
+  wifiStartup(p1); // Connects wifi, and uploads files to database if wifi connected and any files available
   
   /* SETUP */
   SDCardSetup();
@@ -82,7 +85,7 @@ void loop() {
     if (start_new_series) start_new_series = false;
     if (first_edge){
       // Get start time
-      if(getDateStatus(p)){
+      if(getDateStatus(p2)){
         p.begin("date");
         p.addParameter("+%F");
         p.run();
@@ -119,7 +122,7 @@ void loop() {
     
     SDCardSaveData(start_time, date, getNumMeasurementsCompleted(), mode_char);
 
-    wifiStatusAndConnectAndUpload(p); // Checks WiFi, connects and uploads files if possible
+    wifiStatusAndConnectAndUpload(p3); // Checks WiFi, connects and uploads files if possible
     setAllLEDs(mode);
   }
 

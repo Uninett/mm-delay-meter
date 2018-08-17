@@ -23,14 +23,14 @@ bool getDateStatus(Process p)
 void wifiStartup(Process p)
 /* Check WiFi configuration and connect at power-up. */
 {
-    p.runShellCommand(F("/mnt/sda1/arduino/startup.sh"));
-    while (p.running());
+    p.runShellCommandAsynchronously(F("/mnt/sda1/arduino/startup.sh"));
+    //while (p.running());
 }
 
 void wifiStatusAndConnectAndUpload(Process p)
 /* Runs periodically. Checks WiFi status and reconnects if needed. Uploads new
  * data to a database and marks them as uploaded. */
 {
-    p.runShellCommand(F("/mnt/sda1/arduino/periodic_wifi_func.sh"));
-    while (p.running());
+    p.runShellCommandAsynchronously(F("/mnt/sda1/arduino/periodic_wifi_func.sh"));
+    //while (p.running());
 }
