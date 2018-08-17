@@ -114,12 +114,14 @@ wifi_status
 if [ "$CONNECTED" = "0" ]
 then
 	# Scan for available networks. Check if eduroam is one of them
+	echo $(date "+%F %H:%M:%S:") "WIFI_CONNECT - Scan for available networks" >> /mnt/sda1/arduino/log.txt
 	wifi_scan
 	EDUROAM_RETURN_CODE=$?
 
 	if [ "$EDUROAM_RETURN_CODE" = "1" ]
 	then
 		echo "Eduroam available"
+		echo $(date "+%F %H:%M:%S:") "WIFI_CONNECT - Eduroam available. Configure and connect." >> /mnt/sda1/arduino/log.txt
 
 		# Configure wifi and wait for connection
 		wifi_config_2
@@ -134,6 +136,7 @@ then
 			if [ "$ATTEMPTS" -ge "10" ]
 			then
 				echo "Unable to connect to WiFi."
+				echo $(date "+%F %H:%M:%S:") "WIFI_CONNECT - Unable to connect to WiFi." >> /mnt/sda1/arduino/log.txt
 				ATTEMPTS=0
 				break
 			fi
@@ -141,6 +144,7 @@ then
 		done
 	else
 		echo "Eduroam unavailable"
+		echo $(date "+%F %H:%M:%S:") "WIFI_CONNECT - Eduroam uavailable." >> /mnt/sda1/arduino/log.txt
 
 	fi
 	
@@ -151,18 +155,19 @@ then
 	
 	while [ "$IP_STATUS" = "0" ]
 	do
+		echo $(date "+%F %H:%M:%S:") "WIFI_CONNECT - Waiting to be assigned IP." >> /mnt/sda1/arduino/log.txt
 		wifi_status
 		if [ "$IP_status" = 1 ]
 		then
 			echo "Connected to " $SSID". IP: " $IP
-			echo $(date "+%F %H:%M:%S:") "Connected to" $SSID". IP:" $IP >> /mnt/sda1/arduino/log.txt
+			echo $(date "+%F %H:%M:%S:") "WIFI_CONNECT - Connected to" $SSID". IP:" $IP >> /mnt/sda1/arduino/log.txt
 			break
 		fi
 	done
 	if [ "$IP_STATUS" = "1" ]
 	then
 		echo "Connected to " $SSID". IP: " $IP
-		echo $(date "+%F %H:%M:%S:") "Connected to" $SSID". IP:" $IP >> /mnt/sda1/arduino/log.txt
+		echo $(date "+%F %H:%M:%S:") "WIFI_CONNECT - Connected to" $SSID". IP:" $IP >> /mnt/sda1/arduino/log.txt
 
 	fi
 	
