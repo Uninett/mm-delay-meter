@@ -26,11 +26,8 @@ Process p;
 Logger Log;
 
 void setup() {
-  Serial.begin(9600);
-  while(!Serial);
 
   /* Bridge startup */
-  Serial.println(F("Bridge..."));
   Bridge.begin();
   digitalWrite(LED_BUILTIN, HIGH);
 
