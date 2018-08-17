@@ -37,61 +37,8 @@ void setup() {
   /* Log */
   Log.begin();
 
-
-  
-//  wifiConfig("Arduino", "uninett", networkId, "", "YUNArduinoAP", "NO", "none");
-//  if(!wifiStatus2()){
-//    wifiConfig("Arduino", "uninett", networkId, "", "YUNArduinoAP", "NO", "none");
-//    while(!wifiStatus2()){
-//      Serial.print(".");
-//      wifi_attempts++;
-//      if (wifi_attempts >= 10){
-//        Serial.print("\nUnable to connect to ");
-//        Serial.print(networkId);
-//        Serial.println(".");
-//        wifi_attempts = 0;
-//        break;
-//      }
-//    }
-//  }
-//  Process wifiCheck;
-//  String resultStr = "";
-//  wifiCheck.runShellCommand(F("/usr/bin/pretty-wifi-info.lua | grep \"IP address\" | cut -f2 -d\":\" | cut -f1 -d\"/\"" ));
-//  while (wifiCheck.running());
-//  while (wifiCheck.available() > 0) {
-//     char c = wifiCheck.read();
-//     resultStr += c;
-//  }
-//  resultStr.trim();
-//  Serial.print("IP: ");
-//  Serial.println(resultStr);
-//  
-//  while (resultStr == ""){
-//    resultStr = "";
-//    wifiCheck.runShellCommand(F("/usr/bin/pretty-wifi-info.lua | grep \"IP address\" | cut -f2 -d\":\" | cut -f1 -d\"/\"" ));
-//    while (wifiCheck.running());
-//    while (wifiCheck.available() > 0) {
-//       char c = wifiCheck.read();
-//       resultStr += c;
-//    }
-//    resultStr.trim();
-//    Serial.print("IP: ");
-//    Serial.println(resultStr);
-//    delay(2000);
-//  }
-
   /* WiFi */
   wifiStartup(p); // Connects wifi, and uploads files to database if wifi connected and any files available
-
-//  p.begin("date");
-//  p.addParameter("+%F %H:%M:%S");
-//  p.run();
-//  date = "";
-//  while(p.available() > 0) {
-//    char c = p.read();
-//    date += c;
-//  }
-//  Serial.println(date);
   
   /* SETUP */
   SDCardSetup();
