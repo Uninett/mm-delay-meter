@@ -5,6 +5,7 @@ IP=""
 SSID=""
 CONNECTED=0
 IP_STATUS=0
+wifilist=""
 
 wifi_status() {
 	SIGNAL=$(/usr/bin/pretty-wifi-info.lua | grep "Signal" | cut -f2 -d" " | cut -f1 -d"%")
@@ -84,31 +85,65 @@ wifi_config_2() {
 
 }
 
+
+wifi_scan() {
+	scan=$(iwinfo wlan0 scan | grep ESSID | cut -f2 -d"\"")
+
+	wifilist=$(echo $scan | tr " " "\n")
+
+	#for wifi in $wifilist
+	#do
+	#	echo "> [$wifi]"
+	#done
+	
+	for wifi in $wifilist
+	do
+		if [ "$wifi" = "eduroam" ]
+		then
+			return 1
+		fi
+	done
+	return 0
+
+}
+
+
 # Check initial status
 wifi_status
 
 if [ "$CONNECTED" = "0" ]
 then
-	# Configure wifi and wait for connection
+	# Scan for available networks. Check if eduroam is one of them
+	wifi_scan
+	EDUROAM_RETURN_CODE=$?
 
-	wifi_config_2
-	/bin/sleep 1
-	wifi_status
-	while [ "$CONNECTED" = "0" ]
-	do 
-		echo .
-		ATTEMPTS=$((ATTEMPTS+1))
-		wifi_status
-		
-		if [ "$ATTEMPTS" -ge "10" ]
-		then
-			echo "Unable to connect to WiFi."
-			echo $(date "+%F %H:%M:%S:") "Unable to connect to WiFi." >> /mnt/sda1/arduino/log.txt
-			ATTEMPTS=0
-			break
-		fi
+	if [ "$EDUROAM_RETURN_CODE" = "1" ]
+	then
+		echo "Eduroam available"
+
+		# Configure wifi and wait for connection
+		wifi_config_2
 		/bin/sleep 1
-	done
+		wifi_status
+		while [ "$CONNECTED" = "0" ]
+		do 
+			echo .
+			ATTEMPTS=$((ATTEMPTS+1))
+			wifi_status
+			
+			if [ "$ATTEMPTS" -ge "10" ]
+			then
+				echo "Unable to connect to WiFi."
+				ATTEMPTS=0
+				break
+			fi
+			/bin/sleep 1
+		done
+	else
+		echo "Eduroam unavailable"
+
+	fi
+	
 fi
 if [ "$CONNECTED" = "1" ]
 then
