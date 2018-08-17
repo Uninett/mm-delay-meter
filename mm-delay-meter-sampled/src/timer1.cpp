@@ -1,3 +1,37 @@
+//
+// ArduinoTimer is distributed under the FreeBSD License
+//
+// Copyright (c) 2013, Carlos Rafael Gimenes das Neves
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice, this
+//    list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
+//    and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+// ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// The views and conclusions contained in the software and documentation are those
+// of the authors and should not be interpreted as representing official policies,
+// either expressed or implied, of the FreeBSD Project.
+//
+// https://github.com/carlosrafaelgn/ArduinoTimer
+//
+
+/***************************************************/
 #include "timer1.h"
 #include "config.h"
 
@@ -61,14 +95,8 @@ uint16_t readTimer1(void)
 	SREG = sreg;
 	return i;
 }
+/***************************************************/
 
-ISR(TIMER1_OVF_vect){
-	timer1_ovf_flag = 1;
-}
-
-ISR(TIMER1_COMPA_vect){
-	timer1_comp_match_flag = 1;
-}
 
 bool timer1CheckFlag(uint8_t flag_type)
 /* Check for a timer 1 interrupt of the specified type */
@@ -101,4 +129,12 @@ void timer1ClearFlags()
 {
 	timer1_ovf_flag = 0;
 	timer1_comp_match_flag = 0;
+}
+
+ISR(TIMER1_OVF_vect){
+	timer1_ovf_flag = 1;
+}
+
+ISR(TIMER1_COMPA_vect){
+	timer1_comp_match_flag = 1;
 }
