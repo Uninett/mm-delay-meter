@@ -24,6 +24,7 @@ A log file is generated and saved in */mnt/sda1/arduino/log.txt* in the Arduino'
 ## Getting started
 #### Requirements
 - Arduino Yún Rev 2
+  - With package wpad-mini replaced with wpad
 - Micro SD card
 - Circuit: 
 ![mm-delay-meter](img/circuit_diagram.PNG)
